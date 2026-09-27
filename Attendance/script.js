@@ -1,3 +1,28 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    where,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPQ",
+    authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
+    projectId: "mentoria-medicina-attend-7d5ca",
+    storageBucket: "mentoria-medicina-attend-7d5ca.firebasestorage.app",
+    messagingSenderId: "238479536134",
+    appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+console.log("Firebase connected!");
 /* ==================================================
    STUDENT GROUPS
 ================================================== */
@@ -205,10 +230,31 @@ const absentCount =
    Later Firebase will replace this.
 */
 
-localStorage.setItem(
-    "attendanceData",
-    JSON.stringify(attendance)
-);
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    where,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPQ",
+    authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
+    projectId: "mentoria-medicina-attend-7d5ca",
+    storageBucket: "mentoria-medicina-attend-7d5ca.firebasestorage.app",
+    messagingSenderId: "238479536134",
+    appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+console.log("Firebase connected!");
 
 
 /* ==================================================
@@ -474,10 +520,31 @@ function markAbsent(group, student) {
        Save to browser temporarily.
     */
 
-    localStorage.setItem(
-        "attendanceData",
-        JSON.stringify(attendance)
-    );
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    where,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPQ",
+    authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
+    projectId: "mentoria-medicina-attend-7d5ca",
+    storageBucket: "mentoria-medicina-attend-7d5ca.firebasestorage.app",
+    messagingSenderId: "238479536134",
+    appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+console.log("Firebase connected!");
 
 
     /*
