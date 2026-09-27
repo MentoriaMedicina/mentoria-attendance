@@ -205,10 +205,10 @@ const absentCount =
    Later Firebase will replace this.
 */
 
-let attendance =
-    JSON.parse(
-        localStorage.getItem("attendanceData") || "{}"
-    );
+localStorage.setItem(
+    "attendanceData",
+    JSON.stringify(attendance)
+);
 
 
 /* ==================================================
