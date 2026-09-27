@@ -2,301 +2,270 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-    <title>Mentoria Medicina - Admin</title>
+    <title>Admin Login - Mentoria Medicina</title>
 
-    <!-- Same CSS used by student page -->
     <link rel="stylesheet" href="style.css">
-
 </head>
-
 
 <body>
 
+    <!-- ==============================
+         ADMIN LOGIN
+         ============================== -->
 
-<!-- ==============================
-     LOGIN SECTION
-============================== -->
+    <section id="loginSection" class="login-box">
 
-<section id="loginSection" class="login-box">
+        <h2>Admin Login</h2>
 
-    <h2>🔐 Admin Login</h2>
-
-    <p class="login-subtitle">
-        Mentoria Medicina Attendance
-    </p>
-
-
-    <input
-        type="email"
-        id="email"
-        placeholder="Admin Email"
-        autocomplete="email"
-    >
-
-
-    <input
-        type="password"
-        id="password"
-        placeholder="Password"
-        autocomplete="current-password"
-    >
-
-
-    <button
-        id="loginBtn"
-        class="login-btn"
-    >
-        Login
-    </button>
-
-
-    <p id="loginMessage"></p>
-
-</section>
-
-
-
-<!-- ==============================
-     ADMIN DASHBOARD
-============================== -->
-
-<div id="adminDashboard" style="display:none;">
-
-
-    <header>
-
-        <h1>Mentoria Medicina</h1>
-
-        <p class="admin-subtitle">
-            Admin Attendance Dashboard
+        <p class="login-subtitle">
+            Mentoria Medicina Attendance
         </p>
 
-    </header>
+        <input
+            type="email"
+            id="email"
+            placeholder="Admin Email"
+            autocomplete="email"
+        >
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            autocomplete="current-password"
+        >
+
+        <button
+            id="loginBtn"
+            class="login-btn"
+        >
+            Login
+        </button>
+
+        <p id="loginMessage"></p>
+
+    </section>
 
 
+    <!-- ==============================
+         ADMIN DASHBOARD
+         ============================== -->
 
-    <main class="admin-container">
+    <section
+        id="adminDashboard"
+        style="display:none;"
+    >
 
+        <header class="admin-header">
 
-        <!-- ADMIN INFORMATION -->
+            <h1>Mentoria Medicina</h1>
 
-        <section class="admin-card">
+            <p class="admin-subtitle">
+                Attendance Admin Panel
+            </p>
 
-            <strong>Admin:</strong>
-
-            <span id="adminEmail">
-                Loading...
-            </span>
-
-
-            <button
-                class="logout-btn"
-                id="logoutBtn"
-            >
-                Logout
-            </button>
-
-        </section>
+        </header>
 
 
+        <main class="admin-container">
 
-        <!-- FILTERS -->
+            <!-- ADMIN INFORMATION -->
 
-        <section class="admin-card">
+            <div class="admin-user">
 
-            <h2>
-                Attendance Report
-            </h2>
+                <button
+                    id="logoutBtn"
+                    class="logout-btn"
+                >
+                    Logout
+                </button>
 
+                <strong>Logged in as:</strong>
 
-            <div class="admin-filters">
-
-
-                <div>
-
-                    <label for="groupSelect">
-                        Group
-                    </label>
-
-
-                    <select id="groupSelect">
-
-                        <option value="">
-                            Select Group
-                        </option>
-
-                        <option value="7">
-                            Group 7
-                        </option>
-
-                        <option value="9">
-                            Group 9
-                        </option>
-
-                        <option value="10">
-                            Group 10
-                        </option>
-
-                        <option value="11">
-                            Group 11
-                        </option>
-
-                        <option value="12">
-                            Group 12
-                        </option>
-
-                        <option value="13">
-                            Group 13
-                        </option>
-
-                        <option value="15">
-                            Group 15
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-
-                <div>
-
-                    <label for="dateSelect">
-                        Date
-                    </label>
-
-
-                    <input
-                        type="date"
-                        id="dateSelect"
-                    >
-
-                </div>
+                <span id="adminEmail">
+                    Admin
+                </span>
 
             </div>
 
 
-            <button
-                class="view-btn"
-                id="viewBtn"
-            >
-                View Attendance
-            </button>
+            <!-- FILTER -->
 
-        </section>
+            <div class="admin-card">
+
+                <h2>Attendance Report</h2>
+
+                <div class="admin-filters">
+
+                    <div>
+
+                        <label for="groupFilter">
+                            Group
+                        </label>
+
+                        <select id="groupFilter">
+
+                            <option value="">
+                                All Groups
+                            </option>
+
+                            <option value="7">
+                                Group 7
+                            </option>
+
+                            <option value="9">
+                                Group 9
+                            </option>
+
+                            <option value="10">
+                                Group 10
+                            </option>
+
+                            <option value="11">
+                                Group 11
+                            </option>
+
+                            <option value="12">
+                                Group 12
+                            </option>
+
+                            <option value="13">
+                                Group 13
+                            </option>
+
+                            <option value="15">
+                                Group 15
+                            </option>
+
+                        </select>
+
+                    </div>
 
 
+                    <div>
 
-        <!-- STATISTICS -->
+                        <label for="dateFilter">
+                            Date
+                        </label>
 
-        <section class="admin-card">
+                        <input
+                            type="date"
+                            id="dateFilter"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="viewBtn"
+                    class="view-btn"
+                >
+                    View Attendance
+                </button>
+
+            </div>
+
+
+            <!-- STATISTICS -->
 
             <div class="stats">
 
-
                 <div class="stat">
 
                     <span
-                        class="stat-number"
                         id="totalStudents"
+                        class="stat-number"
                     >
                         0
                     </span>
 
-                    Total Students
+                    <span class="stat-label">
+                        Total Students
+                    </span>
 
                 </div>
-
 
 
                 <div class="stat">
 
                     <span
-                        class="stat-number"
                         id="absentCount"
+                        class="stat-number"
                     >
                         0
                     </span>
 
-                    Absent
+                    <span class="stat-label">
+                        Absent
+                    </span>
 
                 </div>
-
 
 
                 <div class="stat">
 
                     <span
-                        class="stat-number"
                         id="presentCount"
+                        class="stat-number"
                     >
                         0
                     </span>
 
-                    Present
-
-                </div>
-
-
-            </div>
-
-        </section>
-
-
-
-        <!-- ABSENT LIST -->
-
-        <section class="admin-card">
-
-            <h2>
-                Absent Students
-            </h2>
-
-
-            <div id="absentList">
-
-                <div class="message">
-
-                    Select group and date.
+                    <span class="stat-label">
+                        Present
+                    </span>
 
                 </div>
 
             </div>
 
 
-            <button
-                class="pdf-btn"
-                id="pdfBtn"
-            >
-                Generate PDF
-            </button>
+            <!-- ABSENT LIST -->
 
-        </section>
+            <div class="admin-card">
+
+                <h2>
+                    Absent Students
+                </h2>
+
+                <div id="absentList">
+
+                    <div class="message">
+                        Select a date and click
+                        "View Attendance".
+                    </div>
+
+                </div>
+
+                <button
+                    id="pdfBtn"
+                    class="pdf-btn"
+                >
+                    Download / Print Report
+                </button>
+
+            </div>
+
+        </main>
+
+    </section>
 
 
-    </main>
+    <!-- IMPORTANT:
+         Keep this BEFORE </body>
+    -->
 
-</div>
-
-
-
-<!-- ==============================
-     ADMIN JAVASCRIPT
-============================== -->
-
-<script
-    type="module"
-    src="admin.js"
-></script>
-
+    <script
+        type="module"
+        src="admin.js">
+    </script>
 
 </body>
 
