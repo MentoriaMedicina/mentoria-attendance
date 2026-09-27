@@ -23,10 +23,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
 const db = getFirestore(app);
 
-console.log("Firebase connected successfully");
+console.log("Firebase connected");
 
 
 /* ==================================================
@@ -210,18 +209,14 @@ const absentCount =
 
 
 /* ==================================================
-   ATTENDANCE DATA
+   ATTENDANCE MEMORY
 ================================================== */
-
-/*
-   Attendance will now come from Firebase.
-*/
 
 let attendance = {};
 
 
 /* ==================================================
-   LOAD GROUPS
+   LOAD GROUPS INTO DROPDOWN
 ================================================== */
 
 Object.keys(groups).forEach(groupName => {
@@ -230,7 +225,6 @@ Object.keys(groups).forEach(groupName => {
         document.createElement("option");
 
     option.value = groupName;
-
     option.textContent = groupName;
 
     groupSelect.appendChild(option);
@@ -245,85 +239,12 @@ Object.keys(groups).forEach(groupName => {
 function createStudentId(group, name) {
 
     return (
-        group
-        + "_"
-        + name
+        group +
+        "_" +
+        name
             .replace(/\s+/g, "_")
             .replace(/[.#$[\]/]/g, "")
     );
-
-}
-
-
-/* ==================================================
-   LOAD ATTENDANCE FROM FIREBASE
-================================================== */
-
-async function loadAttendance() {
-
-    attendance = {};
-
-    const selectedGroup =
-        groupSelect.value;
-
-    if (!selectedGroup) {
-
-        displayStudents();
-
-        return;
-
-    }
-
-
-    const students =
-        groups[selectedGroup];
-
-
-    for (const student of students) {
-
-        const studentId =
-            createStudentId(
-                selectedGroup,
-                student
-            );
-
-
-        try {
-
-            const attendanceRef =
-                doc(
-                    db,
-                    "attendance",
-                    studentId
-                );
-
-
-            const attendanceSnap =
-                await getDoc(
-                    attendanceRef
-                );
-
-
-            if (attendanceSnap.exists()) {
-
-                attendance[studentId] =
-                    attendanceSnap.data();
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Error loading attendance:",
-                error
-            );
-
-        }
-
-    }
-
-
-    displayStudents();
 
 }
 
@@ -346,6 +267,8 @@ function displayStudents() {
     studentList.innerHTML = "";
 
 
+    /* No group selected */
+
     if (!selectedGroup) {
 
         classTitle.textContent =
@@ -365,6 +288,8 @@ function displayStudents() {
         return;
     }
 
+
+    /* Group selected */
 
     classTitle.textContent =
         selectedGroup;
@@ -402,6 +327,8 @@ function displayStudents() {
             }
 
 
+            /* Search */
+
             if (
                 searchText &&
                 !student
@@ -415,31 +342,27 @@ function displayStudents() {
 
 
             /* =========================
-               STUDENT CARD
+               CARD
             ========================= */
 
             const card =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             card.className =
                 "student-card";
 
 
+            /* Student information */
+
             const studentInfo =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             studentInfo.className =
                 "student-info";
 
 
             const number =
-                document.createElement(
-                    "span"
-                );
+                document.createElement("span");
 
             number.className =
                 "student-number";
@@ -449,9 +372,7 @@ function displayStudents() {
 
 
             const name =
-                document.createElement(
-                    "span"
-                );
+                document.createElement("span");
 
             name.className =
                 "student-name";
@@ -460,23 +381,16 @@ function displayStudents() {
                 student;
 
 
-            studentInfo.appendChild(
-                number
-            );
-
-            studentInfo.appendChild(
-                name
-            );
+            studentInfo.appendChild(number);
+            studentInfo.appendChild(name);
 
 
             /* =========================
-               BUTTON
+               ABSENT BUTTON
             ========================= */
 
             const button =
-                document.createElement(
-                    "button"
-                );
+                document.createElement("button");
 
             button.className =
                 "absent-button";
@@ -499,32 +413,19 @@ function displayStudents() {
                 button.textContent =
                     "ABSENT";
 
-
                 button.onclick =
-                    function () {
-
-                        markAbsent(
-                            selectedGroup,
-                            student
-                        );
-
-                    };
+                    () => markAbsent(
+                        selectedGroup,
+                        student
+                    );
 
             }
 
 
-            card.appendChild(
-                studentInfo
-            );
+            card.appendChild(studentInfo);
+            card.appendChild(button);
 
-            card.appendChild(
-                button
-            );
-
-
-            studentList.appendChild(
-                card
-            );
+            studentList.appendChild(card);
 
         }
     );
@@ -537,7 +438,106 @@ function displayStudents() {
 
 
 /* ==================================================
-   MARK ABSENT
+   LOAD ATTENDANCE FROM FIREBASE
+================================================== */
+
+async function loadAttendance() {
+
+    const selectedGroup =
+        groupSelect.value;
+
+
+    if (!selectedGroup) {
+
+        return;
+
+    }
+
+
+    /*
+       First show students immediately.
+    */
+
+    displayStudents();
+
+
+    const students =
+        groups[selectedGroup];
+
+
+    /*
+       Clear old group attendance.
+    */
+
+    attendance = {};
+
+
+    /*
+       Load each student's record.
+    */
+
+    for (const student of students) {
+
+        const studentId =
+            createStudentId(
+                selectedGroup,
+                student
+            );
+
+
+        try {
+
+            const attendanceRef =
+                doc(
+                    db,
+                    "attendance",
+                    studentId
+                );
+
+
+            const attendanceSnap =
+                await getDoc(
+                    attendanceRef
+                );
+
+
+            if (
+                attendanceSnap.exists()
+            ) {
+
+                attendance[studentId] =
+                    attendanceSnap.data();
+
+            }
+
+        } catch (error) {
+
+            /*
+               Firebase error will NOT
+               stop the student list.
+            */
+
+            console.error(
+                "Firebase loading error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+       Update buttons after Firebase load.
+    */
+
+    displayStudents();
+
+}
+
+
+/* ==================================================
+   MARK STUDENT ABSENT
 ================================================== */
 
 async function markAbsent(
@@ -553,8 +553,7 @@ async function markAbsent(
 
 
     /*
-       Prevent duplicate submission
-       on this page.
+       Already submitted?
     */
 
     if (attendance[studentId]) {
@@ -564,7 +563,12 @@ async function markAbsent(
     }
 
 
-    const attendanceData = {
+    /*
+       Temporarily disable by adding
+       local record immediately.
+    */
+
+    attendance[studentId] = {
 
         studentId: studentId,
 
@@ -575,15 +579,18 @@ async function markAbsent(
         status: "absent",
 
         submittedAt:
-            serverTimestamp()
+            new Date()
 
     };
+
+
+    displayStudents();
 
 
     try {
 
         /*
-           Save to Firebase Firestore.
+           Save to Firestore.
         */
 
         await setDoc(
@@ -592,31 +599,21 @@ async function markAbsent(
                 "attendance",
                 studentId
             ),
-            attendanceData
+            {
+
+                studentId: studentId,
+
+                studentName: student,
+
+                group: group,
+
+                status: "absent",
+
+                submittedAt:
+                    serverTimestamp()
+
+            }
         );
-
-
-        /*
-           Update local screen.
-        */
-
-        attendance[studentId] = {
-
-            studentId: studentId,
-
-            studentName: student,
-
-            group: group,
-
-            status: "absent",
-
-            submittedAt:
-                new Date()
-
-        };
-
-
-        displayStudents();
 
 
         alert(
@@ -628,14 +625,24 @@ async function markAbsent(
     } catch (error) {
 
         console.error(
-            "Firebase error:",
+            "Firebase save error:",
             error
         );
 
 
+        /*
+           If Firebase failed,
+           remove temporary record.
+        */
+
+        delete attendance[studentId];
+
+        displayStudents();
+
+
         alert(
-            "Unable to save attendance.\n\n" +
-            "Please check your Firebase Firestore rules."
+            "Attendance could not be saved.\n\n" +
+            "Please check Firestore Security Rules."
         );
 
     }
@@ -644,18 +651,33 @@ async function markAbsent(
 
 
 /* ==================================================
-   EVENT LISTENERS
+   GROUP CHANGE
 ================================================== */
 
 groupSelect.addEventListener(
     "change",
     async function () {
 
+        /*
+           Show students immediately.
+        */
+
+        displayStudents();
+
+
+        /*
+           Then load Firebase data.
+        */
+
         await loadAttendance();
 
     }
 );
 
+
+/* ==================================================
+   SEARCH
+================================================== */
 
 searchInput.addEventListener(
     "input",
