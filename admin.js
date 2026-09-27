@@ -1,11 +1,6 @@
-/* =========================================
-   FIREBASE
-========================================= */
-
 import {
     initializeApp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-
 
 import {
     getAuth,
@@ -14,580 +9,241 @@ import {
     signOut
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-
 import {
     getFirestore,
     doc,
-    getDoc,
-    collection,
-    getDocs
+    getDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
-
-/* =========================================
-   FIREBASE CONFIG
-========================================= */
-
 const firebaseConfig = {
-
-    apiKey:
-        "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPQ",
-
-    authDomain:
-        "mentoria-medicina-attend-7d5ca.firebaseapp.com",
-
-    projectId:
-        "mentoria-medicina-attend-7d5ca",
-
-    storageBucket:
-        "mentoria-medicina-attend-7d5ca.firebasestorage.app",
-
-    messagingSenderId:
-        "238479536134",
-
-    appId:
-        "1:238479536134:web:3ff9a57dc1cb70dc8c9387"
+    apiKey: "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPQ",
+    authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
+    projectId: "mentoria-medicina-attend-7d5ca",
+    storageBucket: "mentoria-medicina-attend-7d5ca.firebasestorage.app",
+    messagingSenderId: "238479536134",
+    appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387",
+    measurementId: "G-WEVCZ0JG2K"
 };
 
 
+const app = initializeApp(firebaseConfig);
 
-/* =========================================
-   INITIALIZE FIREBASE
-========================================= */
+const auth = getAuth(app);
 
-const app =
-    initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-
-const auth =
-    getAuth(app);
-
-
-const db =
-    getFirestore(app);
-
-
-
-/* =========================================
-   ELEMENTS
-========================================= */
 
 const loginSection =
     document.getElementById("loginSection");
 
-
 const adminDashboard =
     document.getElementById("adminDashboard");
-
 
 const emailInput =
     document.getElementById("email");
 
-
 const passwordInput =
     document.getElementById("password");
-
 
 const loginBtn =
     document.getElementById("loginBtn");
 
-
 const loginMessage =
     document.getElementById("loginMessage");
 
-
 const adminEmail =
     document.getElementById("adminEmail");
-
 
 const logoutBtn =
     document.getElementById("logoutBtn");
 
 
-const groupSelect =
-    document.getElementById("groupSelect");
+/* =========================
+   LOGIN
+   ========================= */
 
+loginBtn.addEventListener("click", async () => {
 
-const dateSelect =
-    document.getElementById("dateSelect");
+    const email = emailInput.value.trim();
 
+    const password = passwordInput.value;
 
-const viewBtn =
-    document.getElementById("viewBtn");
+    loginMessage.textContent = "";
 
-
-const absentList =
-    document.getElementById("absentList");
-
-
-const totalStudents =
-    document.getElementById("totalStudents");
-
-
-const absentCount =
-    document.getElementById("absentCount");
-
-
-const presentCount =
-    document.getElementById("presentCount");
-
-
-const pdfBtn =
-    document.getElementById("pdfBtn");
-
-
-
-/* =========================================
-   ADMIN LOGIN
-========================================= */
-
-loginBtn.addEventListener(
-    "click",
-    async () => {
-
-        const email =
-            emailInput.value.trim();
-
-
-        const password =
-            passwordInput.value;
-
-
-        if (!email || !password) {
-
-            loginMessage.textContent =
-                "Please enter email and password.";
-
-            return;
-        }
-
+    if (!email || !password) {
 
         loginMessage.textContent =
-            "Logging in...";
-
-
-        try {
-
-            const userCredential =
-                await signInWithEmailAndPassword(
-                    auth,
-                    email,
-                    password
-                );
-
-
-            const user =
-                userCredential.user;
-
-
-            /* Check admins collection */
-
-            const adminRef =
-                doc(
-                    db,
-                    "admins",
-                    user.uid
-                );
-
-
-            const adminSnap =
-                await getDoc(adminRef);
-
-
-            if (
-                !adminSnap.exists()
-                ||
-                adminSnap.data().role !== "admin"
-            ) {
-
-                await signOut(auth);
-
-
-                loginMessage.textContent =
-                    "This account is not an admin.";
-
-                return;
-            }
-
-
-            /* Admin verified */
-
-            showDashboard(user);
-
-
-        } catch (error) {
-
-            console.error(error);
-
-
-            loginMessage.textContent =
-                "Login failed. Check email and password.";
-
-        }
-
-    }
-);
-
-
-
-/* =========================================
-   CHECK EXISTING LOGIN
-========================================= */
-
-onAuthStateChanged(
-    auth,
-    async (user) => {
-
-        if (!user) {
-
-            showLogin();
-
-            return;
-        }
-
-
-        try {
-
-            const adminRef =
-                doc(
-                    db,
-                    "admins",
-                    user.uid
-                );
-
-
-            const adminSnap =
-                await getDoc(adminRef);
-
-
-            if (
-                adminSnap.exists()
-                &&
-                adminSnap.data().role === "admin"
-            ) {
-
-                showDashboard(user);
-
-            } else {
-
-                await signOut(auth);
-
-                showLogin();
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Admin check error:",
-                error
-            );
-
-            showLogin();
-
-        }
-
-    }
-);
-
-
-
-/* =========================================
-   SHOW LOGIN
-========================================= */
-
-function showLogin() {
-
-    loginSection.style.display =
-        "block";
-
-
-    adminDashboard.style.display =
-        "none";
-
-}
-
-
-
-/* =========================================
-   SHOW DASHBOARD
-========================================= */
-
-function showDashboard(user) {
-
-    loginSection.style.display =
-        "none";
-
-
-    adminDashboard.style.display =
-        "block";
-
-
-    adminEmail.textContent =
-        user.email;
-
-}
-
-
-
-/* =========================================
-   LOGOUT
-========================================= */
-
-logoutBtn.addEventListener(
-    "click",
-    async () => {
-
-        await signOut(auth);
-
-        showLogin();
-
-    }
-);
-
-
-
-/* =========================================
-   VIEW ATTENDANCE
-========================================= */
-
-viewBtn.addEventListener(
-    "click",
-    async () => {
-
-        const group =
-            groupSelect.value;
-
-
-        const date =
-            dateSelect.value;
-
-
-        if (!group || !date) {
-
-            alert(
-                "Please select group and date."
-            );
-
-            return;
-        }
-
-
-        absentList.innerHTML =
-            `
-            <div class="message">
-                Loading attendance...
-            </div>
-            `;
-
-
-        try {
-
-            const snapshot =
-                await getDocs(
-                    collection(
-                        db,
-                        "attendance"
-                    )
-                );
-
-
-            const records = [];
-
-
-            snapshot.forEach(
-                (attendanceDoc) => {
-
-                    const data =
-                        attendanceDoc.data();
-
-
-                    if (
-                        String(data.group)
-                        ===
-                        String(group)
-                        &&
-                        data.date === date
-                    ) {
-
-                        records.push(data);
-
-                    }
-
-                }
-            );
-
-
-            showAttendance(
-                records,
-                group
-            );
-
-
-        } catch (error) {
-
-            console.error(error);
-
-
-            absentList.innerHTML =
-                `
-                <div class="message error">
-                    Unable to load attendance.
-                    <br><br>
-                    ${error.message}
-                </div>
-                `;
-
-        }
-
-    }
-);
-
-
-
-/* =========================================
-   SHOW ATTENDANCE
-========================================= */
-
-function showAttendance(
-    records,
-    group
-) {
-
-    /*
-       Number of students
-       according to group.
-    */
-
-    const groupStudentCount = {
-
-        "7": 20,
-        "9": 19,
-        "10": 20,
-        "11": 20,
-        "12": 20,
-        "13": 20,
-        "15": 9
-
-    };
-
-
-    const total =
-        groupStudentCount[group] || 0;
-
-
-    totalStudents.textContent =
-        total;
-
-
-    absentCount.textContent =
-        records.length;
-
-
-    presentCount.textContent =
-        Math.max(
-            total - records.length,
-            0
-        );
-
-
-    absentList.innerHTML = "";
-
-
-    if (records.length === 0) {
-
-        absentList.innerHTML =
-            `
-            <div class="message">
-                No absent students found.
-            </div>
-            `;
+            "Please enter email and password.";
 
         return;
     }
 
 
-    records.forEach(
-        (student, index) => {
+    loginBtn.disabled = true;
 
-            const item =
-                document.createElement("div");
+    loginBtn.textContent = "Logging in...";
 
 
-            item.className =
-                "absent-item";
+    try {
+
+        const userCredential =
+            await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
 
 
-            let time = "";
+        const user =
+            userCredential.user;
 
 
-            if (student.submittedAt) {
+        console.log("Firebase login successful");
 
-                if (
-                    typeof student
-                        .submittedAt
-                        .toDate === "function"
-                ) {
-
-                    time =
-                        student
-                            .submittedAt
-                            .toDate()
-                            .toLocaleTimeString();
-
-                }
-
-            }
+        console.log("UID:", user.uid);
 
 
-            item.innerHTML = `
+        /*
+         * Check whether this user is an admin
+         */
 
-                <div>
+        const adminRef =
+            doc(db, "admins", user.uid);
 
-                    <div class="student-name">
-
-                        ${index + 1}.
-                        ${student.studentName || "Unknown"}
-
-                    </div>
-
-                    <div class="time">
-
-                        ${time}
-
-                    </div>
-
-                </div>
+        const adminSnap =
+            await getDoc(adminRef);
 
 
-                <strong>
-                    ABSENT
-                </strong>
+        if (!adminSnap.exists()) {
 
-            `;
+            await signOut(auth);
+
+            loginMessage.textContent =
+                "Login successful, but this user is not an admin.";
+
+            return;
+        }
 
 
-            absentList.appendChild(item);
+        const adminData =
+            adminSnap.data();
+
+
+        if (adminData.role !== "admin") {
+
+            await signOut(auth);
+
+            loginMessage.textContent =
+                "This account does not have admin permission.";
+
+            return;
+        }
+
+
+        loginMessage.textContent = "";
+
+        loginSection.style.display = "none";
+
+        adminDashboard.style.display = "block";
+
+        adminEmail.textContent = user.email;
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        /*
+         * Show the REAL Firebase error
+         */
+
+        loginMessage.textContent =
+            error.code + " : " + error.message;
+    }
+
+
+    loginBtn.disabled = false;
+
+    loginBtn.textContent = "Login";
+
+});
+
+
+/* =========================
+   CHECK LOGIN STATE
+   ========================= */
+
+onAuthStateChanged(auth, async (user) => {
+
+    if (!user) {
+
+        loginSection.style.display = "block";
+
+        adminDashboard.style.display = "none";
+
+        return;
+    }
+
+
+    try {
+
+        const adminRef =
+            doc(db, "admins", user.uid);
+
+        const adminSnap =
+            await getDoc(adminRef);
+
+
+        if (
+            adminSnap.exists() &&
+            adminSnap.data().role === "admin"
+        ) {
+
+            loginSection.style.display = "none";
+
+            adminDashboard.style.display = "block";
+
+            adminEmail.textContent =
+                user.email;
+
+        } else {
+
+            await signOut(auth);
+
+            loginSection.style.display = "block";
+
+            adminDashboard.style.display = "none";
 
         }
-    );
 
-}
+    } catch (error) {
 
+        console.error(error);
 
-
-/* =========================================
-   PDF
-========================================= */
-
-pdfBtn.addEventListener(
-    "click",
-    () => {
-
-        alert(
-            "PDF generation will be added next."
-        );
+        loginMessage.textContent =
+            "Admin verification failed: " +
+            error.message;
 
     }
-);
+
+});
+
+
+/* =========================
+   LOGOUT
+   ========================= */
+
+logoutBtn.addEventListener("click", async () => {
+
+    await signOut(auth);
+
+    loginSection.style.display = "block";
+
+    adminDashboard.style.display = "none";
+
+    emailInput.value = "";
+
+    passwordInput.value = "";
+
+});
