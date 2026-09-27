@@ -6,9 +6,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebas
 
 import {
     getFirestore,
-    doc,
-    getDoc,
-    setDoc,
+    collection,
+    query,
+    where,
+    getDocs,
+    addDoc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -186,7 +188,7 @@ const groups = {
 
 
 /* ==================================================
-   VARIABLES
+   HTML ELEMENTS
 ================================================== */
 
 const groupSelect =
@@ -201,6 +203,9 @@ const studentList =
 const classTitle =
     document.getElementById("classTitle");
 
+const attendanceStatus =
+    document.getElementById("attendanceStatus");
+
 const totalStudents =
     document.getElementById("totalStudents");
 
@@ -209,27 +214,14 @@ const absentCount =
 
 
 /* ==================================================
-   ATTENDANCE MEMORY
+   VARIABLES
 ================================================== */
+
+let activeSession = null;
 
 let attendance = {};
 
-
-/* ==================================================
-   LOAD GROUPS INTO DROPDOWN
-================================================== */
-
-Object.keys(groups).forEach(groupName => {
-
-    const option =
-        document.createElement("option");
-
-    option.value = groupName;
-    option.textContent = groupName;
-
-    groupSelect.appendChild(option);
-
-});
+let loading = false;
 
 
 /* ==================================================
@@ -250,6 +242,273 @@ function createStudentId(group, name) {
 
 
 /* ==================================================
+   LOAD GROUPS
+================================================== */
+
+Object.keys(groups).forEach(groupName => {
+
+    const option =
+        document.createElement("option");
+
+    option.value = groupName;
+
+    option.textContent = groupName;
+
+    groupSelect.appendChild(option);
+
+});
+
+
+/* ==================================================
+   FIND ACTIVE SESSION
+================================================== */
+
+async function findActiveSession() {
+
+    try {
+
+        const sessionsRef =
+            collection(db, "sessions");
+
+        const sessionQuery =
+            query(
+                sessionsRef,
+                where("active", "==", true)
+            );
+
+        const snapshot =
+            await getDocs(sessionQuery);
+
+
+        activeSession = null;
+
+
+        if (snapshot.empty) {
+
+            updateStatus("No active attendance");
+
+            return null;
+
+        }
+
+
+        /*
+           Find a session whose time
+           is currently active.
+        */
+
+        const now =
+            new Date();
+
+
+        for (const sessionDoc of snapshot.docs) {
+
+            const data =
+                sessionDoc.data();
+
+
+            let startTime = null;
+            let endTime = null;
+
+
+            if (data.startTime) {
+
+                startTime =
+                    data.startTime.toDate
+                        ? data.startTime.toDate()
+                        : new Date(data.startTime);
+
+            }
+
+
+            if (data.endTime) {
+
+                endTime =
+                    data.endTime.toDate
+                        ? data.endTime.toDate()
+                        : new Date(data.endTime);
+
+            }
+
+
+            /*
+               If session has no time,
+               consider it active.
+            */
+
+            if (
+                !startTime ||
+                !endTime ||
+                (
+                    now >= startTime &&
+                    now <= endTime
+                )
+            ) {
+
+                activeSession = {
+
+                    id: sessionDoc.id,
+
+                    ...data
+
+                };
+
+                break;
+
+            }
+
+        }
+
+
+        if (!activeSession) {
+
+            updateStatus("Attendance closed");
+
+            return null;
+
+        }
+
+
+        updateStatus(
+            "Attendance Open"
+        );
+
+
+        return activeSession;
+
+
+    } catch (error) {
+
+        console.error(
+            "Session loading error:",
+            error
+        );
+
+
+        updateStatus(
+            "Connection error"
+        );
+
+
+        return null;
+
+    }
+
+}
+
+
+/* ==================================================
+   UPDATE ATTENDANCE STATUS
+================================================== */
+
+function updateStatus(message) {
+
+    if (attendanceStatus) {
+
+        attendanceStatus.textContent =
+            message;
+
+    }
+
+}
+
+
+/* ==================================================
+   LOAD ATTENDANCE
+================================================== */
+
+async function loadAttendance() {
+
+    attendance = {};
+
+
+    if (!activeSession) {
+
+        displayStudents();
+
+        return;
+
+    }
+
+
+    const selectedGroup =
+        groupSelect.value;
+
+
+    if (!selectedGroup) {
+
+        displayStudents();
+
+        return;
+
+    }
+
+
+    try {
+
+        const attendanceRef =
+            collection(db, "attendance");
+
+
+        const attendanceQuery =
+            query(
+                attendanceRef,
+                where(
+                    "sessionId",
+                    "==",
+                    activeSession.id
+                ),
+                where(
+                    "group",
+                    "==",
+                    selectedGroup
+                )
+            );
+
+
+        const snapshot =
+            await getDocs(
+                attendanceQuery
+            );
+
+
+        snapshot.forEach(
+            attendanceDoc => {
+
+                const data =
+                    attendanceDoc.data();
+
+
+                attendance[
+                    data.studentId
+                ] = {
+
+                    id: attendanceDoc.id,
+
+                    ...data
+
+                };
+
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Attendance loading error:",
+            error
+        );
+
+    }
+
+
+    displayStudents();
+
+}
+
+
+/* ==================================================
    DISPLAY STUDENTS
 ================================================== */
 
@@ -257,6 +516,7 @@ function displayStudents() {
 
     const selectedGroup =
         groupSelect.value;
+
 
     const searchText =
         searchInput.value
@@ -267,7 +527,9 @@ function displayStudents() {
     studentList.innerHTML = "";
 
 
-    /* No group selected */
+    /*
+       No group selected
+    */
 
     if (!selectedGroup) {
 
@@ -280,16 +542,18 @@ function displayStudents() {
         absentCount.textContent =
             "0";
 
+
         studentList.innerHTML =
-            '<div class="empty-message">' +
-            'Please select a group.' +
-            '</div>';
+            `
+            <div class="empty-message">
+                Please select a group.
+            </div>
+            `;
 
         return;
+
     }
 
-
-    /* Group selected */
 
     classTitle.textContent =
         selectedGroup;
@@ -327,7 +591,9 @@ function displayStudents() {
             }
 
 
-            /* Search */
+            /*
+               Search filter
+            */
 
             if (
                 searchText &&
@@ -382,6 +648,7 @@ function displayStudents() {
 
 
             studentInfo.appendChild(number);
+
             studentInfo.appendChild(name);
 
 
@@ -396,6 +663,10 @@ function displayStudents() {
                 "absent-button";
 
 
+            /*
+               Already absent
+            */
+
             if (record) {
 
                 button.textContent =
@@ -408,10 +679,33 @@ function displayStudents() {
                     "submitted"
                 );
 
-            } else {
+            }
+
+
+            /*
+               No active session
+            */
+
+            else if (!activeSession) {
+
+                button.textContent =
+                    "CLOSED";
+
+                button.disabled =
+                    true;
+
+            }
+
+
+            /*
+               Active session
+            */
+
+            else {
 
                 button.textContent =
                     "ABSENT";
+
 
                 button.onclick =
                     () => markAbsent(
@@ -422,10 +716,17 @@ function displayStudents() {
             }
 
 
-            card.appendChild(studentInfo);
-            card.appendChild(button);
+            card.appendChild(
+                studentInfo
+            );
 
-            studentList.appendChild(card);
+            card.appendChild(
+                button
+            );
+
+            studentList.appendChild(
+                card
+            );
 
         }
     );
@@ -438,106 +739,7 @@ function displayStudents() {
 
 
 /* ==================================================
-   LOAD ATTENDANCE FROM FIREBASE
-================================================== */
-
-async function loadAttendance() {
-
-    const selectedGroup =
-        groupSelect.value;
-
-
-    if (!selectedGroup) {
-
-        return;
-
-    }
-
-
-    /*
-       First show students immediately.
-    */
-
-    displayStudents();
-
-
-    const students =
-        groups[selectedGroup];
-
-
-    /*
-       Clear old group attendance.
-    */
-
-    attendance = {};
-
-
-    /*
-       Load each student's record.
-    */
-
-    for (const student of students) {
-
-        const studentId =
-            createStudentId(
-                selectedGroup,
-                student
-            );
-
-
-        try {
-
-            const attendanceRef =
-                doc(
-                    db,
-                    "attendance",
-                    studentId
-                );
-
-
-            const attendanceSnap =
-                await getDoc(
-                    attendanceRef
-                );
-
-
-            if (
-                attendanceSnap.exists()
-            ) {
-
-                attendance[studentId] =
-                    attendanceSnap.data();
-
-            }
-
-        } catch (error) {
-
-            /*
-               Firebase error will NOT
-               stop the student list.
-            */
-
-            console.error(
-                "Firebase loading error:",
-                error
-            );
-
-        }
-
-    }
-
-
-    /*
-       Update buttons after Firebase load.
-    */
-
-    displayStudents();
-
-}
-
-
-/* ==================================================
-   MARK STUDENT ABSENT
+   MARK ABSENT
 ================================================== */
 
 async function markAbsent(
@@ -545,16 +747,31 @@ async function markAbsent(
     student
 ) {
 
+    /*
+       No session
+    */
+
+    if (!activeSession) {
+
+        alert(
+            "Attendance is currently closed."
+        );
+
+        return;
+
+    }
+
+
+    /*
+       Check if already submitted
+    */
+
     const studentId =
         createStudentId(
             group,
             student
         );
 
-
-    /*
-       Already submitted?
-    */
 
     if (attendance[studentId]) {
 
@@ -564,8 +781,7 @@ async function markAbsent(
 
 
     /*
-       Temporarily disable by adding
-       local record immediately.
+       Temporarily show submitted
     */
 
     attendance[studentId] = {
@@ -577,6 +793,9 @@ async function markAbsent(
         group: group,
 
         status: "absent",
+
+        sessionId:
+            activeSession.id,
 
         submittedAt:
             new Date()
@@ -590,24 +809,41 @@ async function markAbsent(
     try {
 
         /*
-           Save to Firestore.
+           Save as a NEW document.
+
+           This means:
+
+           Day 1:
+           session1_student
+
+           Day 2:
+           session2_student
+
+           Therefore old attendance
+           is never overwritten.
         */
 
-        await setDoc(
-            doc(
+        await addDoc(
+            collection(
                 db,
-                "attendance",
-                studentId
+                "attendance"
             ),
             {
 
-                studentId: studentId,
+                sessionId:
+                    activeSession.id,
 
-                studentName: student,
+                studentId:
+                    studentId,
 
-                group: group,
+                studentName:
+                    student,
 
-                status: "absent",
+                group:
+                    group,
+
+                status:
+                    "absent",
 
                 submittedAt:
                     serverTimestamp()
@@ -631,18 +867,20 @@ async function markAbsent(
 
 
         /*
-           If Firebase failed,
-           remove temporary record.
+           Remove temporary record
         */
 
-        delete attendance[studentId];
+        delete attendance[
+            studentId
+        ];
+
 
         displayStudents();
 
 
         alert(
             "Attendance could not be saved.\n\n" +
-            "Please check Firestore Security Rules."
+            "Please check Firebase Firestore Rules."
         );
 
     }
@@ -658,16 +896,9 @@ groupSelect.addEventListener(
     "change",
     async function () {
 
-        /*
-           Show students immediately.
-        */
+        attendance = {};
 
         displayStudents();
-
-
-        /*
-           Then load Firebase data.
-        */
 
         await loadAttendance();
 
@@ -686,7 +917,49 @@ searchInput.addEventListener(
 
 
 /* ==================================================
-   INITIAL DISPLAY
+   INITIAL LOAD
 ================================================== */
 
-displayStudents();
+async function initializeAttendance() {
+
+    loading = true;
+
+
+    updateStatus(
+        "Checking attendance..."
+    );
+
+
+    await findActiveSession();
+
+
+    /*
+       If admin opened a session,
+       automatically select its group.
+    */
+
+    if (
+        activeSession &&
+        activeSession.group &&
+        groups[activeSession.group]
+    ) {
+
+        groupSelect.value =
+            activeSession.group;
+
+    }
+
+
+    await loadAttendance();
+
+
+    loading = false;
+
+}
+
+
+/* ==================================================
+   START
+================================================== */
+
+initializeAttendance();
