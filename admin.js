@@ -1,3 +1,7 @@
+/* ==================================================
+   FIREBASE
+================================================== */
+
 import {
     initializeApp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
@@ -16,23 +20,68 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
+/* ==================================================
+   FIREBASE CONFIG
+================================================== */
+
 const firebaseConfig = {
-    apiKey: "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPQ",
-    authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
-    projectId: "mentoria-medicina-attend-7d5ca",
-    storageBucket: "mentoria-medicina-attend-7d5ca.firebasestorage.app",
-    messagingSenderId: "238479536134",
-    appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387",
-    measurementId: "G-WEVCZ0JG2K"
+
+    apiKey:
+        "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPQ",
+
+    authDomain:
+        "mentoria-medicina-attend-7d5ca.firebaseapp.com",
+
+    projectId:
+        "mentoria-medicina-attend-7d5ca",
+
+    storageBucket:
+        "mentoria-medicina-attend-7d5ca.firebasestorage.app",
+
+    messagingSenderId:
+        "238479536134",
+
+    appId:
+        "1:238479536134:web:3ff9a57dc1cb70dc8c9387"
 };
 
 
-const app = initializeApp(firebaseConfig);
+/* ==================================================
+   INITIALIZE FIREBASE
+================================================== */
 
-const auth = getAuth(app);
+let app;
+let auth;
+let db;
 
-const db = getFirestore(app);
 
+try {
+
+    app = initializeApp(firebaseConfig);
+
+    auth = getAuth(app);
+
+    db = getFirestore(app);
+
+    console.log("=================================");
+    console.log("Firebase initialized successfully");
+    console.log("Project ID:", firebaseConfig.projectId);
+    console.log("Auth Domain:", firebaseConfig.authDomain);
+    console.log("=================================");
+
+} catch (error) {
+
+    console.error(
+        "Firebase initialization error:",
+        error
+    );
+
+}
+
+
+/* ==================================================
+   HTML ELEMENTS
+================================================== */
 
 const loginSection =
     document.getElementById("loginSection");
@@ -59,57 +108,222 @@ const logoutBtn =
     document.getElementById("logoutBtn");
 
 
-/* =========================
-   LOGIN
-   ========================= */
+/* ==================================================
+   CHECK HTML ELEMENTS
+================================================== */
 
-loginBtn.addEventListener("click", async () => {
+if (!loginSection) {
 
-    const email = emailInput.value.trim();
+    console.error(
+        "ERROR: loginSection not found."
+    );
 
-    const password = passwordInput.value;
+}
 
-    loginMessage.textContent = "";
+if (!adminDashboard) {
 
-    if (!email || !password) {
+    console.error(
+        "ERROR: adminDashboard not found."
+    );
 
-        loginMessage.textContent =
-            "Please enter email and password.";
+}
+
+if (!emailInput) {
+
+    console.error(
+        "ERROR: email input not found."
+    );
+
+}
+
+if (!passwordInput) {
+
+    console.error(
+        "ERROR: password input not found."
+    );
+
+}
+
+if (!loginBtn) {
+
+    console.error(
+        "ERROR: login button not found."
+    );
+
+}
+
+
+/* ==================================================
+   SHOW MESSAGE
+================================================== */
+
+function showMessage(
+    message,
+    type = "error"
+) {
+
+    if (!loginMessage) {
 
         return;
+
+    }
+
+    loginMessage.textContent =
+        message;
+
+    loginMessage.className =
+        type;
+
+}
+
+
+/* ==================================================
+   FIREBASE ERROR MESSAGE
+================================================== */
+
+function getFirebaseErrorMessage(error) {
+
+    console.error(
+        "Firebase error code:",
+        error.code
+    );
+
+    console.error(
+        "Firebase error message:",
+        error.message
+    );
+
+
+    switch (error.code) {
+
+        case "auth/api-key-not-valid":
+
+            return (
+                "Firebase API key is not valid. " +
+                "Please check the Firebase Web App configuration."
+            );
+
+
+        case "auth/invalid-api-key":
+
+            return (
+                "Firebase API key is invalid."
+            );
+
+
+        case "auth/invalid-email":
+
+            return (
+                "Invalid email address."
+            );
+
+
+        case "auth/invalid-credential":
+
+            return (
+                "Invalid email or password."
+            );
+
+
+        case "auth/user-not-found":
+
+            return (
+                "No account found with this email."
+            );
+
+
+        case "auth/wrong-password":
+
+            return (
+                "Incorrect password."
+            );
+
+
+        case "auth/operation-not-allowed":
+
+            return (
+                "Email/Password login is not enabled in Firebase Authentication."
+            );
+
+
+        case "auth/too-many-requests":
+
+            return (
+                "Too many login attempts. Please wait and try again."
+            );
+
+
+        case "auth/network-request-failed":
+
+            return (
+                "Network error. Please check your internet connection."
+            );
+
+
+        case "auth/unauthorized-domain":
+
+            return (
+                "This website domain is not authorized in Firebase Authentication."
+            );
+
+
+        case "permission-denied":
+
+            return (
+                "Firestore permission denied. Check Firestore Security Rules."
+            );
+
+
+        default:
+
+            return (
+                error.code +
+                " : " +
+                error.message
+            );
+
+    }
+
+}
+
+
+/* ==================================================
+   ADMIN VERIFICATION
+================================================== */
+
+async function checkAdmin(user) {
+
+    if (!user) {
+
+        return false;
+
     }
 
 
-    loginBtn.disabled = true;
+    console.log(
+        "Checking admin account..."
+    );
 
-    loginBtn.textContent = "Logging in...";
+    console.log(
+        "User email:",
+        user.email
+    );
+
+    console.log(
+        "User UID:",
+        user.uid
+    );
 
 
     try {
 
-        const userCredential =
-            await signInWithEmailAndPassword(
-                auth,
-                email,
-                password
+        const adminRef =
+            doc(
+                db,
+                "admins",
+                user.uid
             );
 
-
-        const user =
-            userCredential.user;
-
-
-        console.log("Firebase login successful");
-
-        console.log("UID:", user.uid);
-
-
-        /*
-         * Check whether this user is an admin
-         */
-
-        const adminRef =
-            doc(db, "admins", user.uid);
 
         const adminSnap =
             await getDoc(adminRef);
@@ -117,12 +331,12 @@ loginBtn.addEventListener("click", async () => {
 
         if (!adminSnap.exists()) {
 
-            await signOut(auth);
+            console.log(
+                "No admin document found."
+            );
 
-            loginMessage.textContent =
-                "Login successful, but this user is not an admin.";
+            return false;
 
-            return;
         }
 
 
@@ -130,120 +344,244 @@ loginBtn.addEventListener("click", async () => {
             adminSnap.data();
 
 
-        if (adminData.role !== "admin") {
-
-            await signOut(auth);
-
-            loginMessage.textContent =
-                "This account does not have admin permission.";
-
-            return;
-        }
-
-
-        loginMessage.textContent = "";
-
-        loginSection.style.display = "none";
-
-        adminDashboard.style.display = "block";
-
-        adminEmail.textContent = user.email;
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        /*
-         * Show the REAL Firebase error
-         */
-
-        loginMessage.textContent =
-            error.code + " : " + error.message;
-    }
-
-
-    loginBtn.disabled = false;
-
-    loginBtn.textContent = "Login";
-
-});
-
-
-/* =========================
-   CHECK LOGIN STATE
-   ========================= */
-
-onAuthStateChanged(auth, async (user) => {
-
-    if (!user) {
-
-        loginSection.style.display = "block";
-
-        adminDashboard.style.display = "none";
-
-        return;
-    }
-
-
-    try {
-
-        const adminRef =
-            doc(db, "admins", user.uid);
-
-        const adminSnap =
-            await getDoc(adminRef);
+        console.log(
+            "Admin document:",
+            adminData
+        );
 
 
         if (
-            adminSnap.exists() &&
-            adminSnap.data().role === "admin"
+            adminData.role !== "admin"
         ) {
 
-            loginSection.style.display = "none";
+            console.log(
+                "User role is not admin."
+            );
 
-            adminDashboard.style.display = "block";
-
-            adminEmail.textContent =
-                user.email;
-
-        } else {
-
-            await signOut(auth);
-
-            loginSection.style.display = "block";
-
-            adminDashboard.style.display = "none";
+            return false;
 
         }
 
+
+        return true;
+
+
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Admin verification error:",
+            error
+        );
 
-        loginMessage.textContent =
+        showMessage(
             "Admin verification failed: " +
-            error.message;
+            error.message
+        );
+
+        return false;
 
     }
 
-});
+}
 
 
-/* =========================
-   LOGOUT
-   ========================= */
+/* ==================================================
+   LOGIN
+================================================== */
 
-logoutBtn.addEventListener("click", async () => {
+if (loginBtn) {
 
-    await signOut(auth);
+    loginBtn.addEventListener(
+        "click",
+        async () => {
 
-    loginSection.style.display = "block";
+            const email =
+                emailInput.value.trim();
 
-    adminDashboard.style.display = "none";
+            const password =
+                passwordInput.value;
 
-    emailInput.value = "";
 
-    passwordInput.value = "";
+            showMessage("");
 
-});
+
+            if (!email || !password) {
+
+                showMessage(
+                    "Please enter email and password."
+                );
+
+                return;
+
+            }
+
+
+            loginBtn.disabled = true;
+
+            loginBtn.textContent =
+                "Logging in...";
+
+
+            try {
+
+                console.log(
+                    "Starting Firebase login..."
+                );
+
+
+                const userCredential =
+                    await signInWithEmailAndPassword(
+                        auth,
+                        email,
+                        password
+                    );
+
+
+                const user =
+                    userCredential.user;
+
+
+                console.log(
+                    "Firebase login successful."
+                );
+
+                console.log(
+                    "UID:",
+                    user.uid
+                );
+
+
+                /*
+                   Check admin permission
+                */
+
+                const isAdmin =
+                    await checkAdmin(user);
+
+
+                if (!isAdmin) {
+
+                    await signOut(auth);
+
+
+                    showMessage(
+                        "Login successful, but this account is not an admin."
+                    );
+
+
+                    return;
+
+                }
+
+
+                /*
+                   Show dashboard
+                */
+
+                loginSection.style.display =
+                    "none";
+
+                adminDashboard.style.display =
+                    "block";
+
+
+                if (adminEmail) {
+
+                    adminEmail.textContent =
+                        user.email;
+
+                }
+
+
+                console.log(
+                    "Admin dashboard opened."
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "LOGIN ERROR:",
+                    error
+                );
+
+
+                const message =
+                    getFirebaseErrorMessage(
+                        error
+                    );
+
+
+                showMessage(
+                    message
+                );
+
+            } finally {
+
+                loginBtn.disabled =
+                    false;
+
+                loginBtn.textContent =
+                    "Login";
+
+            }
+
+        }
+    );
+
+}
+
+
+/* ==================================================
+   CHECK LOGIN STATE
+================================================== */
+
+if (auth) {
+
+    onAuthStateChanged(
+        auth,
+        async (user) => {
+
+            console.log(
+                "Auth state changed:",
+                user
+                    ? user.email
+                    : "Not logged in"
+            );
+
+
+            if (!user) {
+
+                loginSection.style.display =
+                    "block";
+
+                adminDashboard.style.display =
+                    "none";
+
+                return;
+
+            }
+
+
+            /*
+               User is already logged in.
+               Check admin permission.
+            */
+
+            const isAdmin =
+                await checkAdmin(user);
+
+
+            if (isAdmin) {
+
+                loginSection.style.display =
+                    "none";
+
+                adminDashboard.style.display =
+                    "block";
+
+
+                if (adminEmail) {
+
+                    adminEmail.textContent =
+                        user
