@@ -3,6 +3,7 @@
 ================================================== */
 
 import {
+import {
     initializeApp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
@@ -19,6 +20,10 @@ import {
     getDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
+
+alert("Admin JS loaded successfully");
+
+console.log("ADMIN JS IS LOADED");
 
 /* ==================================================
    FIREBASE CONFIG
