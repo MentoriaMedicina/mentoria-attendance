@@ -1,8 +1,17 @@
 /* ==================================================
-   FIREBASE
+   MENTORIA MEDICINA
+   STUDENT ATTENDANCE
+   Firebase + Firestore
 ================================================== */
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+/* ==================================================
+   FIREBASE IMPORTS
+================================================== */
+
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
 import {
     getFirestore,
@@ -15,19 +24,45 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
+/* ==================================================
+   FIREBASE CONFIG
+================================================== */
+
 const firebaseConfig = {
-    apiKey: "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPQ",
-    authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
-    projectId: "mentoria-medicina-attend-7d5ca",
-    storageBucket: "mentoria-medicina-attend-7d5ca.firebasestorage.app",
-    messagingSenderId: "238479536134",
-    appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387"
+
+    apiKey:
+        "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPQ",
+
+    authDomain:
+        "mentoria-medicina-attend-7d5ca.firebaseapp.com",
+
+    projectId:
+        "mentoria-medicina-attend-7d5ca",
+
+    storageBucket:
+        "mentoria-medicina-attend-7d5ca.firebasestorage.app",
+
+    messagingSenderId:
+        "238479536134",
+
+    appId:
+        "1:238479536134:web:3ff9a57dc1cb70dc8c9387"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
-console.log("Firebase connected");
+/* ==================================================
+   INITIALIZE FIREBASE
+================================================== */
+
+const app =
+    initializeApp(firebaseConfig);
+
+const db =
+    getFirestore(app);
+
+console.log(
+    "Firebase connected successfully"
+);
 
 
 /* ==================================================
@@ -37,6 +72,7 @@ console.log("Firebase connected");
 const groups = {
 
     "Group 7": [
+
         "Jayaram",
         "Nikhil",
         "Afsal",
@@ -57,9 +93,12 @@ const groups = {
         "Neenu",
         "Sona",
         "Avanthika"
+
     ],
 
+
     "Group 9": [
+
         "Ajlan Mahmood",
         "Aliya naushad",
         "Almaz russel",
@@ -79,9 +118,12 @@ const groups = {
         "Jithin",
         "Yaseen",
         "Aishwarya"
+
     ],
 
+
     "Group 10": [
+
         "P Meenakshy Nair",
         "Gloria v s",
         "Sandra. S. R",
@@ -102,9 +144,12 @@ const groups = {
         "Rajeev",
         "Adhitiyan A",
         "Jelshian VA"
+
     ],
 
+
     "Group 11": [
+
         "Anu suresh Aryananda",
         "Archana shaji Akshaya",
         "Biju Anugraha",
@@ -125,9 +170,12 @@ const groups = {
         "Adarsh",
         "Shaji Arjun",
         "Shaji Jagath"
+
     ],
 
+
     "Group 12": [
+
         "Musthaid",
         "anaswara",
         "varsha",
@@ -148,9 +196,12 @@ const groups = {
         "Jeeva",
         "Sidra",
         "Reby"
+
     ],
 
+
     "Group 13": [
+
         "Niranjan",
         "Athul Rajendran",
         "Abhiram Darshan H",
@@ -171,9 +222,12 @@ const groups = {
         "Muhsina",
         "Abhishek",
         "Gulfisha"
+
     ],
 
+
     "Group 15": [
+
         "Joshua jimmy",
         "Saldan k.s",
         "Abhinandh L.S",
@@ -183,7 +237,9 @@ const groups = {
         "Adhithya S",
         "Snena Angel",
         "Christy Sara Pinto"
+
     ]
+
 };
 
 
@@ -192,25 +248,39 @@ const groups = {
 ================================================== */
 
 const groupSelect =
-    document.getElementById("groupSelect");
+    document.getElementById(
+        "groupSelect"
+    );
 
 const searchInput =
-    document.getElementById("searchInput");
+    document.getElementById(
+        "searchInput"
+    );
 
 const studentList =
-    document.getElementById("studentList");
+    document.getElementById(
+        "studentList"
+    );
 
 const classTitle =
-    document.getElementById("classTitle");
+    document.getElementById(
+        "classTitle"
+    );
 
 const attendanceStatus =
-    document.getElementById("attendanceStatus");
+    document.getElementById(
+        "attendanceStatus"
+    );
 
 const totalStudents =
-    document.getElementById("totalStudents");
+    document.getElementById(
+        "totalStudents"
+    );
 
 const absentCount =
-    document.getElementById("absentCount");
+    document.getElementById(
+        "absentCount"
+    );
 
 
 /* ==================================================
@@ -221,14 +291,15 @@ let activeSession = null;
 
 let attendance = {};
 
-let loading = false;
-
 
 /* ==================================================
    CREATE STUDENT ID
 ================================================== */
 
-function createStudentId(group, name) {
+function createStudentId(
+    group,
+    name
+) {
 
     return (
         group +
@@ -242,21 +313,49 @@ function createStudentId(group, name) {
 
 
 /* ==================================================
-   LOAD GROUPS
+   LOAD GROUPS INTO SELECT
 ================================================== */
 
-Object.keys(groups).forEach(groupName => {
+Object.keys(groups).forEach(
+    groupName => {
 
-    const option =
-        document.createElement("option");
+        const option =
+            document.createElement(
+                "option"
+            );
 
-    option.value = groupName;
+        option.value =
+            groupName;
 
-    option.textContent = groupName;
+        option.textContent =
+            groupName;
 
-    groupSelect.appendChild(option);
+        groupSelect.appendChild(
+            option
+        );
 
-});
+    }
+);
+
+
+/* ==================================================
+   UPDATE STATUS
+================================================== */
+
+function updateStatus(
+    message
+) {
+
+    if (
+        attendanceStatus
+    ) {
+
+        attendanceStatus.textContent =
+            message;
+
+    }
+
+}
 
 
 /* ==================================================
@@ -267,73 +366,131 @@ async function findActiveSession() {
 
     try {
 
+        console.log(
+            "Checking active session..."
+        );
+
+
         const sessionsRef =
-            collection(db, "sessions");
+            collection(
+                db,
+                "sessions"
+            );
+
 
         const sessionQuery =
             query(
                 sessionsRef,
-                where("active", "==", true)
+                where(
+                    "active",
+                    "==",
+                    true
+                )
             );
 
+
         const snapshot =
-            await getDocs(sessionQuery);
+            await getDocs(
+                sessionQuery
+            );
 
 
-        activeSession = null;
+        activeSession =
+            null;
 
 
-        if (snapshot.empty) {
+        if (
+            snapshot.empty
+        ) {
 
-            updateStatus("No active attendance");
+            console.log(
+                "No active session"
+            );
+
+            updateStatus(
+                "No active attendance"
+            );
 
             return null;
 
         }
 
 
-        /*
-           Find a session whose time
-           is currently active.
-        */
-
         const now =
             new Date();
 
 
-        for (const sessionDoc of snapshot.docs) {
+        for (
+            const sessionDoc
+            of snapshot.docs
+        ) {
 
             const data =
                 sessionDoc.data();
 
 
-            let startTime = null;
-            let endTime = null;
+            let startTime =
+                null;
+
+            let endTime =
+                null;
 
 
-            if (data.startTime) {
+            /* ---------- START TIME ---------- */
 
-                startTime =
-                    data.startTime.toDate
-                        ? data.startTime.toDate()
-                        : new Date(data.startTime);
+            if (
+                data.startTime
+            ) {
+
+                if (
+                    typeof data.startTime.toDate
+                    === "function"
+                ) {
+
+                    startTime =
+                        data.startTime.toDate();
+
+                } else {
+
+                    startTime =
+                        new Date(
+                            data.startTime
+                        );
+
+                }
 
             }
 
 
-            if (data.endTime) {
+            /* ---------- END TIME ---------- */
 
-                endTime =
-                    data.endTime.toDate
-                        ? data.endTime.toDate()
-                        : new Date(data.endTime);
+            if (
+                data.endTime
+            ) {
+
+                if (
+                    typeof data.endTime.toDate
+                    === "function"
+                ) {
+
+                    endTime =
+                        data.endTime.toDate();
+
+                } else {
+
+                    endTime =
+                        new Date(
+                            data.endTime
+                        );
+
+                }
 
             }
 
 
             /*
-               If session has no time,
-               consider it active.
+               Session without time
+               is treated as active.
             */
 
             if (
@@ -347,7 +504,8 @@ async function findActiveSession() {
 
                 activeSession = {
 
-                    id: sessionDoc.id,
+                    id:
+                        sessionDoc.id,
 
                     ...data
 
@@ -360,13 +518,25 @@ async function findActiveSession() {
         }
 
 
-        if (!activeSession) {
+        /* ---------- NO VALID SESSION ---------- */
 
-            updateStatus("Attendance closed");
+        if (
+            !activeSession
+        ) {
+
+            updateStatus(
+                "Attendance closed"
+            );
 
             return null;
 
         }
+
+
+        console.log(
+            "Active session:",
+            activeSession
+        );
 
 
         updateStatus(
@@ -380,7 +550,7 @@ async function findActiveSession() {
     } catch (error) {
 
         console.error(
-            "Session loading error:",
+            "Session error:",
             error
         );
 
@@ -398,22 +568,6 @@ async function findActiveSession() {
 
 
 /* ==================================================
-   UPDATE ATTENDANCE STATUS
-================================================== */
-
-function updateStatus(message) {
-
-    if (attendanceStatus) {
-
-        attendanceStatus.textContent =
-            message;
-
-    }
-
-}
-
-
-/* ==================================================
    LOAD ATTENDANCE
 ================================================== */
 
@@ -422,7 +576,9 @@ async function loadAttendance() {
     attendance = {};
 
 
-    if (!activeSession) {
+    if (
+        !activeSession
+    ) {
 
         displayStudents();
 
@@ -435,7 +591,9 @@ async function loadAttendance() {
         groupSelect.value;
 
 
-    if (!selectedGroup) {
+    if (
+        !selectedGroup
+    ) {
 
         displayStudents();
 
@@ -447,22 +605,29 @@ async function loadAttendance() {
     try {
 
         const attendanceRef =
-            collection(db, "attendance");
+            collection(
+                db,
+                "attendance"
+            );
 
 
         const attendanceQuery =
             query(
+
                 attendanceRef,
+
                 where(
                     "sessionId",
                     "==",
                     activeSession.id
                 ),
+
                 where(
                     "group",
                     "==",
                     selectedGroup
                 )
+
             );
 
 
@@ -483,13 +648,20 @@ async function loadAttendance() {
                     data.studentId
                 ] = {
 
-                    id: attendanceDoc.id,
+                    id:
+                        attendanceDoc.id,
 
                     ...data
 
                 };
 
             }
+        );
+
+
+        console.log(
+            "Attendance loaded:",
+            attendance
         );
 
 
@@ -524,14 +696,15 @@ function displayStudents() {
             .trim();
 
 
-    studentList.innerHTML = "";
+    studentList.innerHTML =
+        "";
 
 
-    /*
-       No group selected
-    */
+    /* ---------- NO GROUP ---------- */
 
-    if (!selectedGroup) {
+    if (
+        !selectedGroup
+    ) {
 
         classTitle.textContent =
             "Select a group";
@@ -543,35 +716,43 @@ function displayStudents() {
             "0";
 
 
-        studentList.innerHTML =
-            `
+        studentList.innerHTML = `
             <div class="empty-message">
                 Please select a group.
             </div>
-            `;
+        `;
 
         return;
 
     }
 
 
+    /* ---------- GROUP ---------- */
+
     classTitle.textContent =
         selectedGroup;
 
 
     const students =
-        groups[selectedGroup];
+        groups[
+            selectedGroup
+        ];
 
 
     totalStudents.textContent =
         students.length;
 
 
-    let numberOfAbsent = 0;
+    let numberOfAbsent =
+        0;
 
 
     students.forEach(
-        (student, index) => {
+        (
+            student,
+            index
+        ) => {
+
 
             const studentId =
                 createStudentId(
@@ -581,25 +762,29 @@ function displayStudents() {
 
 
             const record =
-                attendance[studentId];
+                attendance[
+                    studentId
+                ];
 
 
-            if (record) {
+            if (
+                record
+            ) {
 
                 numberOfAbsent++;
 
             }
 
 
-            /*
-               Search filter
-            */
+            /* ---------- SEARCH ---------- */
 
             if (
                 searchText &&
                 !student
                     .toLowerCase()
-                    .includes(searchText)
+                    .includes(
+                        searchText
+                    )
             ) {
 
                 return;
@@ -607,28 +792,32 @@ function displayStudents() {
             }
 
 
-            /* =========================
-               CARD
-            ========================= */
+            /* ---------- CARD ---------- */
 
             const card =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
             card.className =
                 "student-card";
 
 
-            /* Student information */
+            /* ---------- INFO ---------- */
 
             const studentInfo =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
             studentInfo.className =
                 "student-info";
 
 
             const number =
-                document.createElement("span");
+                document.createElement(
+                    "span"
+                );
 
             number.className =
                 "student-number";
@@ -638,7 +827,9 @@ function displayStudents() {
 
 
             const name =
-                document.createElement("span");
+                document.createElement(
+                    "span"
+                );
 
             name.className =
                 "student-name";
@@ -647,27 +838,31 @@ function displayStudents() {
                 student;
 
 
-            studentInfo.appendChild(number);
+            studentInfo.appendChild(
+                number
+            );
 
-            studentInfo.appendChild(name);
+            studentInfo.appendChild(
+                name
+            );
 
 
-            /* =========================
-               ABSENT BUTTON
-            ========================= */
+            /* ---------- BUTTON ---------- */
 
             const button =
-                document.createElement("button");
+                document.createElement(
+                    "button"
+                );
 
             button.className =
                 "absent-button";
 
 
-            /*
-               Already absent
-            */
+            /* ---------- ALREADY SUBMITTED ---------- */
 
-            if (record) {
+            if (
+                record
+            ) {
 
                 button.textContent =
                     "✓ SUBMITTED";
@@ -682,11 +877,11 @@ function displayStudents() {
             }
 
 
-            /*
-               No active session
-            */
+            /* ---------- CLOSED ---------- */
 
-            else if (!activeSession) {
+            else if (
+                !activeSession
+            ) {
 
                 button.textContent =
                     "CLOSED";
@@ -697,9 +892,7 @@ function displayStudents() {
             }
 
 
-            /*
-               Active session
-            */
+            /* ---------- ACTIVE ---------- */
 
             else {
 
@@ -707,11 +900,17 @@ function displayStudents() {
                     "ABSENT";
 
 
-                button.onclick =
-                    () => markAbsent(
-                        selectedGroup,
-                        student
-                    );
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        markAbsent(
+                            selectedGroup,
+                            student
+                        );
+
+                    }
+                );
 
             }
 
@@ -723,6 +922,7 @@ function displayStudents() {
             card.appendChild(
                 button
             );
+
 
             studentList.appendChild(
                 card
@@ -747,11 +947,11 @@ async function markAbsent(
     student
 ) {
 
-    /*
-       No session
-    */
+    /* ---------- CHECK SESSION ---------- */
 
-    if (!activeSession) {
+    if (
+        !activeSession
+    ) {
 
         alert(
             "Attendance is currently closed."
@@ -762,10 +962,6 @@ async function markAbsent(
     }
 
 
-    /*
-       Check if already submitted
-    */
-
     const studentId =
         createStudentId(
             group,
@@ -773,7 +969,13 @@ async function markAbsent(
         );
 
 
-    if (attendance[studentId]) {
+    /* ---------- ALREADY SUBMITTED ---------- */
+
+    if (
+        attendance[
+            studentId
+        ]
+    ) {
 
         return;
 
@@ -781,18 +983,25 @@ async function markAbsent(
 
 
     /*
-       Temporarily show submitted
+       Immediately lock the button
+       while Firebase is saving.
     */
 
-    attendance[studentId] = {
+    attendance[
+        studentId
+    ] = {
 
-        studentId: studentId,
+        studentId:
+            studentId,
 
-        studentName: student,
+        studentName:
+            student,
 
-        group: group,
+        group:
+            group,
 
-        status: "absent",
+        status:
+            "absent",
 
         sessionId:
             activeSession.id,
@@ -808,26 +1017,13 @@ async function markAbsent(
 
     try {
 
-        /*
-           Save as a NEW document.
-
-           This means:
-
-           Day 1:
-           session1_student
-
-           Day 2:
-           session2_student
-
-           Therefore old attendance
-           is never overwritten.
-        */
-
         await addDoc(
+
             collection(
                 db,
                 "attendance"
             ),
+
             {
 
                 sessionId:
@@ -849,6 +1045,14 @@ async function markAbsent(
                     serverTimestamp()
 
             }
+
+        );
+
+
+        console.log(
+            "Attendance saved:"
+            ,
+            student
         );
 
 
@@ -866,9 +1070,7 @@ async function markAbsent(
         );
 
 
-        /*
-           Remove temporary record
-        */
+        /* ---------- ROLLBACK ---------- */
 
         delete attendance[
             studentId
@@ -894,7 +1096,7 @@ async function markAbsent(
 
 groupSelect.addEventListener(
     "change",
-    async function () {
+    async () => {
 
         attendance = {};
 
@@ -912,17 +1114,23 @@ groupSelect.addEventListener(
 
 searchInput.addEventListener(
     "input",
-    displayStudents
+    () => {
+
+        displayStudents();
+
+    }
 );
 
 
 /* ==================================================
-   INITIAL LOAD
+   INITIALIZE
 ================================================== */
 
 async function initializeAttendance() {
 
-    loading = true;
+    console.log(
+        "Initializing attendance..."
+    );
 
 
     updateStatus(
@@ -934,14 +1142,20 @@ async function initializeAttendance() {
 
 
     /*
-       If admin opened a session,
-       automatically select its group.
+       Automatically select
+       the active session group.
     */
 
     if (
+
         activeSession &&
+
         activeSession.group &&
-        groups[activeSession.group]
+
+        groups[
+            activeSession.group
+        ]
+
     ) {
 
         groupSelect.value =
@@ -953,7 +1167,9 @@ async function initializeAttendance() {
     await loadAttendance();
 
 
-    loading = false;
+    console.log(
+        "Attendance system ready"
+    );
 
 }
 
