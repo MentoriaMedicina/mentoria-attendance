@@ -24,13 +24,13 @@ import {
 // =====================================================
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPQ",
-    authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
-    projectId: "mentoria-medicina-attend-7d5ca",
-    storageBucket: "mentoria-medicina-attend-7d5ca.firebasestorage.app",
-    messagingSenderId: "238479536134",
-    appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387",
-    measurementId: "G-WEVCZ0JG2K"
+    apiKey: "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPXQ",
+  authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
+  projectId: "mentoria-medicina-attend-7d5ca",
+  storageBucket: "mentoria-medicina-attend-7d5ca.firebasestorage.app",
+  messagingSenderId: "238479536134",
+  appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387",
+  measurementId: "G-WEVCZ0JG2K"
 };
 
 
