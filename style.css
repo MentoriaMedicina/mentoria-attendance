@@ -1,11 +1,11 @@
 /* =========================================================
    MENTORIA MEDICINA - ATTENDANCE SYSTEM
-   Complete CSS for:
-   index.html
-   admin.html
-   ========================================================= */
+   style.css
+========================================================= */
 
-/* ---------- RESET ---------- */
+/* =========================
+   RESET
+========================= */
 
 * {
     box-sizing: border-box;
@@ -26,7 +26,7 @@ body {
 
 /* =========================================================
    STUDENT PAGE
-   ========================================================= */
+========================================================= */
 
 /* ---------- HEADER ---------- */
 
@@ -47,7 +47,7 @@ header h1 {
 }
 
 
-/* ---------- STUDENT CONTROLS ---------- */
+/* ---------- CONTROLS ---------- */
 
 .controls {
     display: flex;
@@ -56,8 +56,10 @@ header h1 {
     margin: auto;
 }
 
-select,
-input {
+.controls select,
+.controls input {
+    flex: 1;
+    width: 100%;
     padding: 12px;
     border: none;
     border-radius: 8px;
@@ -66,20 +68,16 @@ input {
     font-family: inherit;
 }
 
-.controls select,
-.controls input {
-    flex: 1;
-}
-
-select:focus,
-input:focus {
+.controls select:focus,
+.controls input:focus {
     box-shadow: 0 0 0 2px #5dade2;
 }
 
 
-/* ---------- STUDENT CONTAINER ---------- */
+/* ---------- MAIN CONTAINER ---------- */
 
 .container {
+    width: 100%;
     max-width: 720px;
     margin: auto;
     padding: 15px;
@@ -110,8 +108,11 @@ input:focus {
 
 .student-card {
     background: white;
+
     padding: 13px;
+
     margin-bottom: 9px;
+
     border-radius: 12px;
 
     display: flex;
@@ -127,7 +128,9 @@ input:focus {
 
 .student-card:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 
@@ -136,6 +139,7 @@ input:focus {
 .student-info {
     display: flex;
     align-items: center;
+
     gap: 8px;
 
     min-width: 0;
@@ -143,13 +147,17 @@ input:focus {
 
 .student-number {
     color: #777;
+
     font-size: 14px;
+
     min-width: 25px;
 }
 
 .student-name {
     font-size: 16px;
+
     font-weight: 600;
+
     word-break: break-word;
 }
 
@@ -158,15 +166,19 @@ input:focus {
 
 .absent-button {
     border: none;
+
     border-radius: 9px;
 
     padding: 11px 14px;
+
     min-width: 105px;
 
     background: #d9534f;
+
     color: white;
 
     font-weight: bold;
+
     cursor: pointer;
 
     transition: 0.2s;
@@ -182,21 +194,26 @@ input:focus {
 
 .absent-button:disabled {
     cursor: not-allowed;
+
     opacity: 0.8;
 }
 
+
+/* ---------- SUBMITTED BUTTON ---------- */
+
 .absent-button.submitted {
     background: #2e8b57;
+
+    color: white;
+
     cursor: not-allowed;
 }
 
 
-/* ---------- SUBMISSION TIME ---------- */
+/* ---------- CLOSED BUTTON ---------- */
 
-.submission-time {
-    font-size: 11px;
-    color: #666;
-    margin-top: 4px;
+.absent-button:disabled:not(.submitted) {
+    background: #777;
 }
 
 
@@ -204,46 +221,62 @@ input:focus {
 
 .empty-message {
     text-align: center;
+
     padding: 30px;
+
     color: #777;
+
+    background: white;
+
+    border-radius: 12px;
+}
+
+
+/* ---------- STATUS ---------- */
+
+#attendanceStatus {
+    font-weight: bold;
 }
 
 
 /* =========================================================
-   ADMIN LOGIN PAGE
-   ========================================================= */
+   ADMIN LOGIN
+========================================================= */
 
 .login-box {
     max-width: 400px;
 
     margin: 70px auto;
+
     padding: 25px;
 
     background: white;
 
     border-radius: 15px;
 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.12);
 }
 
 .login-box h2 {
     text-align: center;
+
     margin-top: 0;
+
     margin-bottom: 8px;
 }
 
 .login-subtitle {
     text-align: center;
+
     color: #777;
 
     margin-top: 0;
+
     margin-bottom: 20px;
 
     font-size: 14px;
 }
-
-
-/* ---------- LOGIN INPUTS ---------- */
 
 .login-box input {
     width: 100%;
@@ -252,52 +285,50 @@ input:focus {
 
     margin-bottom: 12px;
 
+    padding: 12px;
+
     border: 1px solid #ddd;
+
+    border-radius: 8px;
 
     background: white;
 }
 
 .login-box input:focus {
     border-color: #5dade2;
+
+    outline: none;
 }
-
-
-/* ---------- LOGIN BUTTON ---------- */
 
 .login-btn {
     width: 100%;
 
     background: #173f5f;
+
     color: white;
 
     border: none;
+
     border-radius: 8px;
 
     padding: 12px;
 
     font-weight: bold;
+
     font-size: 15px;
 
     cursor: pointer;
-
-    transition: 0.2s;
 }
 
 .login-btn:hover {
     opacity: 0.9;
 }
 
-.login-btn:active {
-    transform: scale(0.98);
-}
-
 .login-btn:disabled {
     opacity: 0.6;
+
     cursor: not-allowed;
 }
-
-
-/* ---------- LOGIN MESSAGE ---------- */
 
 #loginMessage {
     text-align: center;
@@ -314,7 +345,7 @@ input:focus {
 
 /* =========================================================
    ADMIN DASHBOARD
-   ========================================================= */
+========================================================= */
 
 .admin-container {
     max-width: 850px;
@@ -324,9 +355,6 @@ input:focus {
     padding: 15px;
 }
 
-
-/* ---------- ADMIN HEADER ---------- */
-
 .admin-header {
     background: #173f5f;
 
@@ -334,7 +362,8 @@ input:focus {
 
     padding: 18px 15px;
 
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .admin-header h1 {
@@ -356,7 +385,7 @@ input:focus {
 }
 
 
-/* ---------- ADMIN USER INFO ---------- */
+/* ---------- ADMIN USER ---------- */
 
 .admin-user {
     background: white;
@@ -367,7 +396,8 @@ input:focus {
 
     border-radius: 10px;
 
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08);
 
     overflow: hidden;
 }
@@ -377,7 +407,7 @@ input:focus {
 }
 
 
-/* ---------- LOGOUT BUTTON ---------- */
+/* ---------- LOGOUT ---------- */
 
 .logout-btn {
     float: right;
@@ -395,22 +425,16 @@ input:focus {
     cursor: pointer;
 
     font-weight: bold;
-
-    transition: 0.2s;
 }
 
 .logout-btn:hover {
     opacity: 0.9;
 }
 
-.logout-btn:active {
-    transform: scale(0.96);
-}
-
 
 /* =========================================================
    ADMIN CARDS
-   ========================================================= */
+========================================================= */
 
 .admin-card {
     background: white;
@@ -421,7 +445,8 @@ input:focus {
 
     margin-bottom: 15px;
 
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .admin-card h2 {
@@ -433,7 +458,7 @@ input:focus {
 
 /* =========================================================
    ADMIN FILTERS
-   ========================================================= */
+========================================================= */
 
 .admin-filters {
     display: grid;
@@ -465,7 +490,133 @@ input:focus {
 }
 
 
-/* ---------- VIEW BUTTON ---------- */
+/* =========================================================
+   SESSION CONTROLS
+========================================================= */
+
+.session-controls {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+    margin-top: 10px;
+}
+
+.session-controls label {
+    display: block;
+
+    font-weight: bold;
+
+    margin-bottom: 5px;
+
+    font-size: 14px;
+}
+
+.session-controls input,
+.session-controls select {
+    width: 100%;
+
+    border: 1px solid #ddd;
+
+    border-radius: 8px;
+
+    padding: 11px;
+
+    background: white;
+}
+
+
+/* ---------- SESSION STATUS ---------- */
+
+.session-status {
+    padding: 10px 12px;
+
+    border-radius: 8px;
+
+    margin: 10px 0;
+
+    font-weight: bold;
+
+    text-align: center;
+}
+
+.session-active {
+    background: #d1e7dd;
+
+    color: #0f5132;
+}
+
+.session-closed {
+    background: #f8d7da;
+
+    color: #842029;
+}
+
+.session-status.warning {
+    background: #fff3cd;
+
+    color: #856404;
+}
+
+.session-status.error {
+    background: #f8d7da;
+
+    color: #842029;
+}
+
+
+/* ---------- SESSION BUTTONS ---------- */
+
+.open-session-btn {
+    width: 100%;
+
+    background: #2e8b57;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 8px;
+
+    padding: 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.open-session-btn:hover {
+    background: #267349;
+}
+
+.close-session-btn {
+    width: 100%;
+
+    background: #d9534f;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 8px;
+
+    padding: 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.close-session-btn:hover {
+    background: #b52b27;
+}
+
+
+/* =========================================================
+   VIEW BUTTON
+========================================================= */
 
 .view-btn {
     width: 100%;
@@ -485,22 +636,12 @@ input:focus {
     font-size: 15px;
 
     cursor: pointer;
-
-    transition: 0.2s;
-}
-
-.view-btn:hover {
-    opacity: 0.9;
-}
-
-.view-btn:active {
-    transform: scale(0.98);
 }
 
 
 /* =========================================================
-   ADMIN STATISTICS
-   ========================================================= */
+   STATISTICS
+========================================================= */
 
 .stats {
     display: grid;
@@ -542,8 +683,8 @@ input:focus {
 
 
 /* =========================================================
-   ABSENT STUDENT LIST
-   ========================================================= */
+   ADMIN ABSENT LIST
+========================================================= */
 
 .absent-list {
     margin-top: 10px;
@@ -589,8 +730,8 @@ input:focus {
 
 
 /* =========================================================
-   PRESENT / ABSENT STATUS
-   ========================================================= */
+   STATUS BADGES
+========================================================= */
 
 .status-absent {
     display: inline-block;
@@ -605,512 +746,4 @@ input:focus {
 
     font-size: 12px;
 
-    font-weight: bold;
-}
-
-.status-present {
-    display: inline-block;
-
-    background: #d1e7dd;
-
-    color: #0f5132;
-
-    padding: 5px 9px;
-
-    border-radius: 6px;
-
-    font-size: 12px;
-
-    font-weight: bold;
-}
-
-
-/* =========================================================
-   PDF BUTTON
-   ========================================================= */
-
-.pdf-btn {
-    background: #2e8b57;
-
-    color: white;
-
-    border: none;
-
-    border-radius: 8px;
-
-    padding: 12px 16px;
-
-    font-weight: bold;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-
-    margin-top: 10px;
-}
-
-.pdf-btn:hover {
-    opacity: 0.9;
-}
-
-.pdf-btn:active {
-    transform: scale(0.97);
-}
-
-
-/* =========================================================
-   ADMIN MESSAGES
-   ========================================================= */
-
-.message {
-    text-align: center;
-
-    padding: 25px;
-
-    color: #777;
-}
-
-.error {
-    color: #d9534f;
-
-    font-weight: bold;
-}
-
-.success {
-    color: #2e8b57;
-
-    font-weight: bold;
-}
-
-.warning {
-    color: #b9770e;
-
-    font-weight: bold;
-}
-
-
-/* =========================================================
-   ATTENDANCE SESSION CONTROLS
-   ========================================================= */
-
-.session-controls {
-    display: grid;
-
-    grid-template-columns: 1fr 1fr;
-
-    gap: 10px;
-
-    margin-top: 10px;
-}
-
-.session-controls label {
-    display: block;
-
-    font-weight: bold;
-
-    margin-bottom: 5px;
-
-    font-size: 14px;
-}
-
-.session-controls input,
-.session-controls select {
-    width: 100%;
-
-    border: 1px solid #ddd;
-}
-
-
-/* ---------- SESSION STATUS ---------- */
-
-.session-status {
-    padding: 10px 12px;
-
-    border-radius: 8px;
-
-    margin: 10px 0;
-
-    font-weight: bold;
-
-    text-align: center;
-}
-
-.session-active {
-    background: #d1e7dd;
-
-    color: #0f5132;
-}
-
-.session-closed {
-    background: #f8d7da;
-
-    color: #842029;
-}
-
-
-/* ---------- OPEN / CLOSE SESSION ---------- */
-
-.open-session-btn {
-    width: 100%;
-
-    background: #2e8b57;
-
-    color: white;
-
-    border: none;
-
-    border-radius: 8px;
-
-    padding: 12px;
-
-    font-weight: bold;
-
-    cursor: pointer;
-}
-
-.close-session-btn {
-    width: 100%;
-
-    background: #d9534f;
-
-    color: white;
-
-    border: none;
-
-    border-radius: 8px;
-
-    padding: 12px;
-
-    font-weight: bold;
-
-    cursor: pointer;
-}
-
-
-/* =========================================================
-   LOADING
-   ========================================================= */
-
-.loading {
-    text-align: center;
-
-    padding: 30px;
-
-    color: #777;
-}
-
-.loading::after {
-    content: "...";
-
-    animation: dots 1.2s infinite;
-}
-
-@keyframes dots {
-
-    0% {
-        content: "";
-    }
-
-    33% {
-        content: ".";
-    }
-
-    66% {
-        content: "..";
-    }
-
-    100% {
-        content: "...";
-    }
-}
-
-
-/* =========================================================
-   BADGES
-   ========================================================= */
-
-.badge {
-    display: inline-block;
-
-    padding: 5px 9px;
-
-    border-radius: 20px;
-
-    font-size: 12px;
-
-    font-weight: bold;
-}
-
-.badge-admin {
-    background: #d6eaf8;
-
-    color: #154360;
-}
-
-.badge-absent {
-    background: #f8d7da;
-
-    color: #842029;
-}
-
-.badge-active {
-    background: #d1e7dd;
-
-    color: #0f5132;
-}
-
-
-/* =========================================================
-   TABLE - OPTIONAL ADMIN REPORT
-   ========================================================= */
-
-.report-table-wrapper {
-    width: 100%;
-
-    overflow-x: auto;
-
-    margin-top: 10px;
-}
-
-.report-table {
-    width: 100%;
-
-    border-collapse: collapse;
-
-    background: white;
-
-    font-size: 14px;
-}
-
-.report-table th {
-    background: #173f5f;
-
-    color: white;
-
-    padding: 11px;
-
-    text-align: left;
-}
-
-.report-table td {
-    padding: 10px;
-
-    border-bottom: 1px solid #eee;
-}
-
-.report-table tr:hover {
-    background: #f8f9fa;
-}
-
-
-/* =========================================================
-   SCROLLBAR
-   ========================================================= */
-
-::-webkit-scrollbar {
-    width: 7px;
-
-    height: 7px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #aaa;
-
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #888;
-}
-
-
-/* =========================================================
-   MOBILE RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 600px) {
-
-    /* STUDENT HEADER */
-
-    header {
-        padding: 15px 10px;
-    }
-
-    header h1 {
-        font-size: 20px;
-    }
-
-
-    /* STUDENT CONTROLS */
-
-    .controls {
-        flex-direction: column;
-    }
-
-
-    /* CONTAINER */
-
-    .container {
-        padding: 10px;
-    }
-
-
-    /* STUDENT CARD */
-
-    .student-card {
-        padding: 11px;
-    }
-
-    .student-name {
-        font-size: 14px;
-    }
-
-    .student-number {
-        font-size: 12px;
-    }
-
-
-    /* ABSENT BUTTON */
-
-    .absent-button {
-        min-width: 92px;
-
-        padding: 10px 8px;
-
-        font-size: 12px;
-    }
-
-
-    /* ADMIN */
-
-    .admin-container {
-        padding: 10px;
-    }
-
-    .admin-card {
-        padding: 14px;
-    }
-
-
-    /* FILTERS */
-
-    .admin-filters {
-        grid-template-columns: 1fr;
-    }
-
-
-    /* STATS */
-
-    .stats {
-        grid-template-columns: 1fr;
-    }
-
-
-    /* ABSENT LIST */
-
-    .absent-item {
-        flex-direction: column;
-
-        align-items: flex-start;
-
-        gap: 4px;
-    }
-
-    .time {
-        white-space: normal;
-    }
-
-
-    /* SESSION */
-
-    .session-controls {
-        grid-template-columns: 1fr;
-    }
-
-
-    /* LOGIN */
-
-    .login-box {
-        margin: 40px 15px;
-
-        padding: 20px;
-    }
-}
-
-
-/* =========================================================
-   VERY SMALL PHONES
-   ========================================================= */
-
-@media (max-width: 380px) {
-
-    .student-card {
-        gap: 5px;
-    }
-
-    .student-name {
-        font-size: 13px;
-    }
-
-    .absent-button {
-        min-width: 80px;
-
-        padding: 9px 6px;
-
-        font-size: 11px;
-    }
-
-    .info-box {
-        padding: 12px;
-    }
-
-    .info-box h2 {
-        font-size: 18px;
-    }
-
-    .admin-card {
-        padding: 12px;
-    }
-}
-
-
-/* =========================================================
-   PRINT / PDF
-   ========================================================= */
-
-@media print {
-
-    body {
-        background: white;
-    }
-
-    header,
-    .admin-header,
-    .logout-btn,
-    .view-btn,
-    .pdf-btn,
-    .admin-filters,
-    .session-controls {
-        display: none !important;
-    }
-
-    .admin-container {
-        max-width: 100%;
-
-        padding: 0;
-    }
-
-    .admin-card {
-        box-shadow: none;
-
-        border: 1px solid #ddd;
-    }
-
-    .absent-item {
-        break-inside: avoid;
-    }
-  }
+   
