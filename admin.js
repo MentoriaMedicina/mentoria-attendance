@@ -19,7 +19,6 @@ import {
     set,
     push,
     update,
-    remove,
     onValue
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
@@ -212,24 +211,44 @@ const groups = {
 // HTML ELEMENTS
 // ============================================================
 
-const loginSection = document.getElementById("loginSection");
-const adminDashboard = document.getElementById("adminDashboard");
+const loginSection =
+    document.getElementById("loginSection");
 
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
+const adminDashboard =
+    document.getElementById("adminDashboard");
 
-const loginBtn = document.getElementById("loginBtn");
-const loginMessage = document.getElementById("loginMessage");
+const emailInput =
+    document.getElementById("email");
 
-const adminEmail = document.getElementById("adminEmail");
-const logoutBtn = document.getElementById("logoutBtn");
+const passwordInput =
+    document.getElementById("password");
 
-const groupFilter = document.getElementById("groupFilter");
-const dateFilter = document.getElementById("dateFilter");
+const loginBtn =
+    document.getElementById("loginBtn");
 
-const totalStudents = document.getElementById("totalStudents");
-const absentCount = document.getElementById("absentCount");
-const absentList = document.getElementById("absentList");
+const loginMessage =
+    document.getElementById("loginMessage");
+
+const adminEmail =
+    document.getElementById("adminEmail");
+
+const logoutBtn =
+    document.getElementById("logoutBtn");
+
+const groupFilter =
+    document.getElementById("groupFilter");
+
+const dateFilter =
+    document.getElementById("dateFilter");
+
+const totalStudents =
+    document.getElementById("totalStudents");
+
+const absentCount =
+    document.getElementById("absentCount");
+
+const absentList =
+    document.getElementById("absentList");
 
 
 // ============================================================
@@ -242,7 +261,7 @@ let sessionListener = null;
 
 
 // ============================================================
-// HELPER - SHOW MESSAGE
+// SHOW LOGIN MESSAGE
 // ============================================================
 
 function showLoginMessage(message, isError = true) {
@@ -251,14 +270,13 @@ function showLoginMessage(message, isError = true) {
 
     loginMessage.textContent = message;
 
-    loginMessage.style.color = isError
-        ? "#d32f2f"
-        : "#2e7d32";
+    loginMessage.style.color =
+        isError ? "#d32f2f" : "#2e7d32";
 }
 
 
 // ============================================================
-// HELPER - STUDENT ID
+// STUDENT ID
 // ============================================================
 
 function createStudentId(group, studentName) {
@@ -284,12 +302,17 @@ if (loginBtn) {
 
     loginBtn.addEventListener("click", async () => {
 
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
+        const email =
+            emailInput ? emailInput.value.trim() : "";
+
+        const password =
+            passwordInput ? passwordInput.value : "";
 
         if (!email || !password) {
 
-            showLoginMessage("Please enter email and password.");
+            showLoginMessage(
+                "Please enter email and password."
+            );
 
             return;
         }
@@ -307,37 +330,24 @@ if (loginBtn) {
                 password
             );
 
+            showLoginMessage(
+                "Login successful.",
+                false
+            );
+
         } catch (error) {
 
-            console.error("Login error:", error);
+            console.error(
+                "LOGIN ERROR:",
+                error
+            );
 
-            let message = "Login failed.";
-
-            if (error.code === "auth/invalid-credential") {
-                message = "Invalid email or password.";
-            }
-
-            else if (error.code === "auth/user-not-found") {
-                message = "User not found.";
-            }
-
-            else if (error.code === "auth/wrong-password") {
-                message = "Wrong password.";
-            }
-
-            else if (error.code === "auth/invalid-email") {
-                message = "Invalid email address.";
-            }
-
-            else if (error.code === "auth/too-many-requests") {
-                message = "Too many attempts. Try again later.";
-            }
-
-            else if (error.code === "auth/api-key-not-valid") {
-                message = "Firebase API key is not valid.";
-            }
-
-            showLoginMessage(message);
+            // IMPORTANT:
+            // Show the exact Firebase error.
+            showLoginMessage(
+                "Login error: " +
+                (error.code || "unknown-error")
+            );
 
         } finally {
 
@@ -352,32 +362,40 @@ if (loginBtn) {
 
 
 // ============================================================
-// CHECK ADMIN PERMISSION
+// ADMIN PERMISSION
 // ============================================================
 
 async function verifyAdmin(user) {
 
     try {
 
-        const adminRef = ref(
-            db,
-            "admins/" + user.uid
-        );
+        const adminRef =
+            ref(
+                db,
+                "admins/" + user.uid
+            );
 
-        const snapshot = await get(adminRef);
+        const snapshot =
+            await get(adminRef);
 
         if (!snapshot.exists()) {
+
+            console.error(
+                "No admin record found for UID:",
+                user.uid
+            );
 
             await signOut(auth);
 
             showLoginMessage(
-                "This account does not have admin permission."
+                "Login successful, but this account is not an admin."
             );
 
             return false;
         }
 
-        const adminData = snapshot.val();
+        const adminData =
+            snapshot.val();
 
         if (
             !adminData ||
@@ -398,12 +416,13 @@ async function verifyAdmin(user) {
     } catch (error) {
 
         console.error(
-            "Admin verification error:",
+            "ADMIN VERIFICATION ERROR:",
             error
         );
 
         showLoginMessage(
-            "Unable to verify admin permission."
+            "Admin verification error: " +
+            (error.code || "unknown-error")
         );
 
         return false;
@@ -415,49 +434,57 @@ async function verifyAdmin(user) {
 // AUTH STATE
 // ============================================================
 
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(
+    auth,
+    async (user) => {
 
-    if (!user) {
+        if (!user) {
 
-        currentUser = null;
+            currentUser = null;
+
+            if (loginSection) {
+                loginSection.style.display = "block";
+            }
+
+            if (adminDashboard) {
+                adminDashboard.style.display = "none";
+            }
+
+            return;
+        }
+
+        console.log(
+            "Authenticated user:",
+            user.email,
+            user.uid
+        );
+
+        const isAdmin =
+            await verifyAdmin(user);
+
+        if (!isAdmin) {
+            return;
+        }
+
+        currentUser = user;
 
         if (loginSection) {
-            loginSection.style.display = "block";
+            loginSection.style.display = "none";
         }
 
         if (adminDashboard) {
-            adminDashboard.style.display = "none";
+            adminDashboard.style.display = "block";
         }
 
-        return;
+        if (adminEmail) {
+            adminEmail.textContent =
+                user.email || "";
+        }
+
+        initializeDashboard();
+
     }
-
-
-    const isAdmin = await verifyAdmin(user);
-
-    if (!isAdmin) {
-        return;
-    }
-
-
-    currentUser = user;
-
-    if (loginSection) {
-        loginSection.style.display = "none";
-    }
-
-    if (adminDashboard) {
-        adminDashboard.style.display = "block";
-    }
-
-    if (adminEmail) {
-        adminEmail.textContent = user.email;
-    }
-
-
-    initializeDashboard();
-
-});
+);
 
 
 // ============================================================
@@ -466,22 +493,25 @@ onAuthStateChanged(auth, async (user) => {
 
 if (logoutBtn) {
 
-    logoutBtn.addEventListener("click", async () => {
+    logoutBtn.addEventListener(
+        "click",
+        async () => {
 
-        try {
+            try {
 
-            await signOut(auth);
+                await signOut(auth);
 
-        } catch (error) {
+            } catch (error) {
 
-            console.error(
-                "Logout error:",
-                error
-            );
+                console.error(
+                    "LOGOUT ERROR:",
+                    error
+                );
+
+            }
 
         }
-
-    });
+    );
 
 }
 
@@ -520,29 +550,26 @@ function setupGroupFilter() {
     `;
 
     Object.keys(groups)
-        .sort((a, b) => Number(a) - Number(b))
+        .sort(
+            (a, b) =>
+                Number(a) - Number(b)
+        )
         .forEach(group => {
 
             const option =
                 document.createElement("option");
 
             option.value = group;
-            option.textContent = "Group " + group;
+
+            option.textContent =
+                "Group " + group;
 
             groupFilter.appendChild(option);
 
         });
 
-
-    groupFilter.addEventListener(
-        "change",
-        () => {
-
-            loadStatistics();
-
-        }
-    );
-
+    groupFilter.onchange =
+        loadStatistics;
 }
 
 
@@ -554,32 +581,27 @@ function setupDateFilter() {
 
     if (!dateFilter) return;
 
-    const today = new Date();
+    const today =
+        new Date();
 
     const year =
         today.getFullYear();
 
     const month =
-        String(today.getMonth() + 1)
-            .padStart(2, "0");
+        String(
+            today.getMonth() + 1
+        ).padStart(2, "0");
 
     const day =
-        String(today.getDate())
-            .padStart(2, "0");
+        String(
+            today.getDate()
+        ).padStart(2, "0");
 
     dateFilter.value =
         `${year}-${month}-${day}`;
 
-
-    dateFilter.addEventListener(
-        "change",
-        () => {
-
-            loadStatistics();
-
-        }
-    );
-
+    dateFilter.onchange =
+        loadStatistics;
 }
 
 
@@ -590,24 +612,28 @@ function setupDateFilter() {
 function createSessionPanel() {
 
     const dashboard =
-        document.querySelector(".dashboard-container");
+        document.querySelector(
+            ".dashboard-container"
+        );
 
     if (!dashboard) return;
 
-
-    const existing =
-        document.getElementById("sessionPanel");
-
-    if (existing) return;
-
+    if (
+        document.getElementById(
+            "sessionPanel"
+        )
+    ) {
+        return;
+    }
 
     const panel =
         document.createElement("section");
 
-    panel.id = "sessionPanel";
+    panel.id =
+        "sessionPanel";
 
-    panel.className = "admin-card";
-
+    panel.className =
+        "admin-card";
 
     panel.innerHTML = `
 
@@ -618,19 +644,40 @@ function createSessionPanel() {
             <label>
                 Group
                 <select id="sessionGroup">
-                    <option value="">Select Group</option>
+                    <option value="">
+                        Select Group
+                    </option>
                 </select>
             </label>
 
             <label>
                 Duration
                 <select id="sessionDuration">
-                    <option value="10">10 minutes</option>
-                    <option value="15">15 minutes</option>
-                    <option value="20" selected>20 minutes</option>
-                    <option value="30">30 minutes</option>
-                    <option value="45">45 minutes</option>
-                    <option value="60">60 minutes</option>
+
+                    <option value="10">
+                        10 minutes
+                    </option>
+
+                    <option value="15">
+                        15 minutes
+                    </option>
+
+                    <option value="20" selected>
+                        20 minutes
+                    </option>
+
+                    <option value="30">
+                        30 minutes
+                    </option>
+
+                    <option value="45">
+                        45 minutes
+                    </option>
+
+                    <option value="60">
+                        60 minutes
+                    </option>
+
                 </select>
             </label>
 
@@ -650,45 +697,48 @@ function createSessionPanel() {
         >
             No active session
         </div>
-
     `;
-
 
     dashboard.prepend(panel);
 
-
     const sessionGroup =
-        document.getElementById("sessionGroup");
-
+        document.getElementById(
+            "sessionGroup"
+        );
 
     Object.keys(groups)
-        .sort((a, b) => Number(a) - Number(b))
+        .sort(
+            (a, b) =>
+                Number(a) - Number(b)
+        )
         .forEach(group => {
 
             const option =
                 document.createElement("option");
 
-            option.value = group;
+            option.value =
+                group;
 
             option.textContent =
                 "Group " + group;
 
-            sessionGroup.appendChild(option);
+            sessionGroup.appendChild(
+                option
+            );
 
         });
-
 
     const openBtn =
         document.getElementById(
             "openSessionBtn"
         );
 
-
-    openBtn.addEventListener(
-        "click",
-        openSession
-    );
-
+    if (openBtn) {
+        openBtn.addEventListener(
+            "click",
+            openSession
+        );
+    }
 }
 
 
@@ -708,70 +758,71 @@ async function openSession() {
             "sessionDuration"
         );
 
-
-    if (!sessionGroup || !sessionDuration) {
+    if (
+        !sessionGroup ||
+        !sessionDuration
+    ) {
         return;
     }
-
 
     const group =
         sessionGroup.value;
 
     const duration =
-        Number(sessionDuration.value);
-
+        Number(
+            sessionDuration.value
+        );
 
     if (!group) {
 
-        alert("Please select a group.");
+        alert(
+            "Please select a group."
+        );
 
         return;
     }
 
+    if (!currentUser) {
+
+        alert(
+            "You are not logged in."
+        );
+
+        return;
+    }
 
     try {
-
-        // ----------------------------------------------------
-        // CHECK EXISTING SESSIONS
-        // ----------------------------------------------------
 
         const sessionsSnapshot =
             await get(
                 ref(db, "sessions")
             );
 
-
         const sessions =
             sessionsSnapshot.exists()
                 ? sessionsSnapshot.val()
                 : {};
 
-
         const now =
             Date.now();
-
 
         let activeSessionExists =
             false;
 
+        Object.values(sessions)
+            .forEach(session => {
 
-        Object.entries(sessions)
-            .forEach(
-                ([sessionId, session]) => {
+                if (
+                    session &&
+                    session.active === true &&
+                    Number(session.endTime) > now
+                ) {
 
-                    if (
-                        session &&
-                        session.active === true &&
-                        Number(session.endTime) > now
-                    ) {
-
-                        activeSessionExists = true;
-
-                    }
-
+                    activeSessionExists =
+                        true;
                 }
-            );
 
+            });
 
         if (activeSessionExists) {
 
@@ -782,29 +833,20 @@ async function openSession() {
             return;
         }
 
-
-        // ----------------------------------------------------
-        // CREATE NEW SESSION
-        // ----------------------------------------------------
-
         const sessionRef =
             push(
                 ref(db, "sessions")
             );
 
-
         const sessionId =
             sessionRef.key;
-
 
         const startTime =
             Date.now();
 
-
         const endTime =
             startTime +
             duration * 60 * 1000;
-
 
         const sessionData = {
 
@@ -812,43 +854,44 @@ async function openSession() {
 
             active: true,
 
-            startTime: startTime,
+            startTime:
+                startTime,
 
-            endTime: endTime,
+            endTime:
+                endTime,
 
-            duration: duration,
+            duration:
+                duration,
 
-            createdBy: currentUser.uid,
+            createdBy:
+                currentUser.uid,
 
-            createdAt: Date.now()
+            createdAt:
+                Date.now()
 
         };
-
 
         await set(
             sessionRef,
             sessionData
         );
 
-
         alert(
             `Attendance opened for Group ${group} for ${duration} minutes.`
         );
 
-
     } catch (error) {
 
         console.error(
-            "Open session error:",
+            "OPEN SESSION ERROR:",
             error
         );
 
         alert(
-            "Could not open attendance session."
+            "Could not open attendance session.\n\n" +
+            (error.code || error.message)
         );
-
     }
-
 }
 
 
@@ -862,58 +905,54 @@ function startSessionListener() {
         sessionListener();
     }
 
-
     const sessionsRef =
         ref(db, "sessions");
-
 
     sessionListener =
         onValue(
             sessionsRef,
-            async (snapshot) => {
+            async snapshot => {
 
                 const sessions =
                     snapshot.exists()
                         ? snapshot.val()
                         : {};
 
-
                 const now =
                     Date.now();
 
-
-                let activeSession = null;
-
+                let activeSession =
+                    null;
 
                 for (
                     const [sessionId, session]
                     of Object.entries(sessions)
                 ) {
 
-                    if (!session) continue;
-
+                    if (!session) {
+                        continue;
+                    }
 
                     if (
                         session.active === true &&
                         Number(session.endTime) <= now
                     ) {
 
-                        // Automatically close expired session
-
                         await update(
                             ref(
                                 db,
-                                "sessions/" + sessionId
+                                "sessions/" +
+                                sessionId
                             ),
                             {
                                 active: false,
-                                closedAt: Date.now()
+                                closedAt:
+                                    Date.now()
                             }
                         );
 
                         continue;
                     }
-
 
                     if (
                         session.active === true &&
@@ -922,7 +961,8 @@ function startSessionListener() {
 
                         activeSession = {
 
-                            id: sessionId,
+                            id:
+                                sessionId,
 
                             ...session
 
@@ -932,14 +972,12 @@ function startSessionListener() {
 
                 }
 
-
                 displaySessionStatus(
                     activeSession
                 );
 
             }
         );
-
 }
 
 
@@ -954,29 +992,25 @@ function displaySessionStatus(session) {
             "sessionStatus"
         );
 
-
     const openBtn =
         document.getElementById(
             "openSessionBtn"
         );
 
-
     if (!status) return;
-
 
     if (!session) {
 
-        status.innerHTML = `
-            <strong>No active attendance session.</strong>
-        `;
+        status.innerHTML =
+            "No active session";
 
         if (openBtn) {
-            openBtn.disabled = false;
+            openBtn.disabled =
+                false;
         }
 
         return;
     }
-
 
     const remaining =
         Math.max(
@@ -985,122 +1019,37 @@ function displaySessionStatus(session) {
             Date.now()
         );
 
-
     const minutes =
-        Math.ceil(
+        Math.floor(
             remaining / 60000
         );
 
+    const seconds =
+        Math.floor(
+            (remaining % 60000) /
+            1000
+        );
 
     status.innerHTML = `
-
         <strong>
-            🟢 Attendance is OPEN
+            Group ${session.group}
         </strong>
-
+        —
+        Attendance is OPEN
         <br>
-
-        Group:
-        <strong>${session.group}</strong>
-
-        <br>
-
         Time remaining:
-        <strong>${minutes} minute(s)</strong>
-
-        <br>
-
-        <button
-            id="closeSessionBtn"
-            class="close-session-btn"
-            type="button"
-        >
-            Close Session
-        </button>
-
+        ${minutes}m ${seconds}s
     `;
 
-
     if (openBtn) {
-        openBtn.disabled = true;
+        openBtn.disabled =
+            true;
     }
-
-
-    const closeBtn =
-        document.getElementById(
-            "closeSessionBtn"
-        );
-
-
-    if (closeBtn) {
-
-        closeBtn.addEventListener(
-            "click",
-            () => closeSession(session.id)
-        );
-
-    }
-
 }
 
 
 // ============================================================
-// CLOSE SESSION
-// ============================================================
-
-async function closeSession(sessionId) {
-
-    if (!sessionId) return;
-
-
-    const confirmClose =
-        confirm(
-            "Close this attendance session?"
-        );
-
-
-    if (!confirmClose) {
-        return;
-    }
-
-
-    try {
-
-        await update(
-            ref(
-                db,
-                "sessions/" + sessionId
-            ),
-            {
-                active: false,
-                closedAt: Date.now()
-            }
-        );
-
-
-        alert(
-            "Attendance session closed."
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Close session error:",
-            error
-        );
-
-        alert(
-            "Could not close the session."
-        );
-
-    }
-
-}
-
-
-// ============================================================
-// ATTENDANCE REALTIME LISTENER
+// ATTENDANCE LISTENER
 // ============================================================
 
 function startAttendanceListener() {
@@ -1109,21 +1058,15 @@ function startAttendanceListener() {
         attendanceListener();
     }
 
-
-    const attendanceRef =
-        ref(db, "attendance");
-
-
     attendanceListener =
         onValue(
-            attendanceRef,
+            ref(db, "attendance"),
             () => {
 
                 loadStatistics();
 
             }
         );
-
 }
 
 
@@ -1133,441 +1076,321 @@ function startAttendanceListener() {
 
 async function loadStatistics() {
 
+    if (!totalStudents ||
+        !absentCount ||
+        !absentList) {
+
+        return;
+    }
+
+    const selectedGroup =
+        groupFilter
+            ? groupFilter.value
+            : "all";
+
+    const selectedDate =
+        dateFilter
+            ? dateFilter.value
+            : getTodayString();
+
+    let studentTotal = 0;
+
+    let absentStudents = [];
+
+    const groupsToCheck =
+        selectedGroup === "all"
+            ? Object.keys(groups)
+            : [selectedGroup];
+
+
+    // --------------------------------------------------------
+    // TOTAL STUDENTS
+    // --------------------------------------------------------
+
+    groupsToCheck.forEach(group => {
+
+        if (groups[group]) {
+
+            studentTotal +=
+                groups[group].length;
+
+        }
+
+    });
+
+
+    // --------------------------------------------------------
+    // READ ATTENDANCE FOR SELECTED DATE
+    // --------------------------------------------------------
+
     try {
-
-        const selectedGroup =
-            groupFilter
-                ? groupFilter.value
-                : "all";
-
-
-        const selectedDate =
-            dateFilter
-                ? dateFilter.value
-                : "";
-
-
-        // ----------------------------------------------------
-        // TOTAL STUDENTS
-        // ----------------------------------------------------
-
-        let total = 0;
-
-
-        if (selectedGroup === "all") {
-
-            Object.values(groups)
-                .forEach(
-                    group =>
-                        total += group.length
-                );
-
-        } else {
-
-            total =
-                groups[selectedGroup]
-                    ? groups[selectedGroup].length
-                    : 0;
-
-        }
-
-
-        if (totalStudents) {
-
-            totalStudents.textContent =
-                total;
-
-        }
-
-
-        // ----------------------------------------------------
-        // LOAD SESSIONS
-        // ----------------------------------------------------
-
-        const sessionsSnapshot =
-            await get(
-                ref(db, "sessions")
-            );
-
 
         const attendanceSnapshot =
             await get(
-                ref(db, "attendance")
+                ref(
+                    db,
+                    "attendance/" +
+                    selectedDate
+                )
             );
 
-
-        const sessions =
-            sessionsSnapshot.exists()
-                ? sessionsSnapshot.val()
-                : {};
-
-
-        const attendance =
+        const attendanceData =
             attendanceSnapshot.exists()
                 ? attendanceSnapshot.val()
                 : {};
 
 
-        const absentRecords = [];
-
-
         // ----------------------------------------------------
-        // FIND ATTENDANCE RECORDS
+        // CHECK EACH STUDENT
         // ----------------------------------------------------
 
-        Object.entries(attendance)
-            .forEach(
-                ([sessionId, sessionAttendance]) => {
+        groupsToCheck.forEach(group => {
 
-                    const session =
-                        sessions[sessionId];
+            groups[group].forEach(
+                studentName => {
 
-
-                    if (!session) return;
-
-
-                    const sessionGroup =
-                        String(session.group);
-
-
-                    if (
-                        selectedGroup !== "all" &&
-                        sessionGroup !==
-                        String(selectedGroup)
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    const sessionDate =
-                        formatDate(
-                            Number(
-                                session.startTime
-                            )
+                    const studentId =
+                        createStudentId(
+                            group,
+                            studentName
                         );
 
+                    let record =
+                        findAttendanceRecord(
+                            attendanceData,
+                            group,
+                            studentId,
+                            studentName
+                        );
 
-                    if (
-                        selectedDate &&
-                        sessionDate !==
-                        selectedDate
-                    ) {
+                    if (!isPresent(record)) {
 
-                        return;
+                        absentStudents.push({
+                            group:
+                                group,
+
+                            name:
+                                studentName
+                        });
 
                     }
-
-
-                    if (!sessionAttendance) {
-                        return;
-                    }
-
-
-                    Object.entries(
-                        sessionAttendance
-                    )
-                    .forEach(
-                        ([studentId, record]) => {
-
-                            if (!record) return;
-
-
-                            absentRecords.push({
-
-                                sessionId:
-                                    sessionId,
-
-                                studentId:
-                                    studentId,
-
-                                studentName:
-                                    record.studentName ||
-                                    "Unknown",
-
-                                group:
-                                    record.group ||
-                                    sessionGroup,
-
-                                status:
-                                    record.status ||
-                                    "absent",
-
-                                submittedAt:
-                                    record.submittedAt ||
-                                    null,
-
-                                sessionStart:
-                                    session.startTime
-
-                            });
-
-                        }
-                    );
 
                 }
             );
 
+        });
 
-        // ----------------------------------------------------
-        // DISPLAY ABSENT COUNT
-        // ----------------------------------------------------
+    } catch (error) {
 
-        if (absentCount) {
+        console.error(
+            "STATISTICS ERROR:",
+            error
+        );
 
-            absentCount.textContent =
-                absentRecords.length;
+    }
+
+
+    totalStudents.textContent =
+        studentTotal;
+
+    absentCount.textContent =
+        absentStudents.length;
+
+
+    // --------------------------------------------------------
+    // ABSENT LIST
+    // --------------------------------------------------------
+
+    if (
+        absentStudents.length === 0
+    ) {
+
+        absentList.innerHTML =
+            "<p>No absent students.</p>";
+
+        return;
+    }
+
+
+    absentList.innerHTML =
+        absentStudents
+            .map(student => `
+                <div class="absent-student">
+                    <strong>
+                        ${escapeHtml(
+                            student.name
+                        )}
+                    </strong>
+                    <span>
+                        Group ${escapeHtml(
+                            student.group
+                        )}
+                    </span>
+                </div>
+            `)
+            .join("");
+
+}
+
+
+// ============================================================
+// FIND ATTENDANCE RECORD
+// ============================================================
+
+function findAttendanceRecord(
+    attendanceData,
+    group,
+    studentId,
+    studentName
+) {
+
+    if (!attendanceData) {
+        return null;
+    }
+
+
+    // Format:
+    // attendance/date/group/studentId
+
+    if (
+        attendanceData[group] &&
+        attendanceData[group][studentId]
+    ) {
+
+        return attendanceData[group][studentId];
+
+    }
+
+
+    // Format:
+    // attendance/date/studentId
+
+    if (
+        attendanceData[studentId]
+    ) {
+
+        return attendanceData[studentId];
+
+    }
+
+
+    // Search through records
+
+    for (
+        const value of
+        Object.values(attendanceData)
+    ) {
+
+        if (!value) {
+            continue;
+        }
+
+        if (
+            typeof value === "object"
+        ) {
+
+            if (
+                value.studentId ===
+                studentId
+            ) {
+
+                return value;
+
+            }
+
+            if (
+                value.studentName ===
+                studentName
+            ) {
+
+                if (
+                    !value.group ||
+                    String(value.group) ===
+                    String(group)
+                ) {
+
+                    return value;
+
+                }
+
+            }
 
         }
 
-
-        // ----------------------------------------------------
-        // DISPLAY LIST
-        // ----------------------------------------------------
-
-        displayAbsentList(
-            absentRecords
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Load statistics error:",
-            error
-        );
-
     }
 
+    return null;
 }
 
 
 // ============================================================
-// DISPLAY ABSENT LIST
+// CHECK PRESENT
 // ============================================================
 
-function displayAbsentList(records) {
+function isPresent(record) {
 
-    if (!absentList) return;
-
-
-    if (!records.length) {
-
-        absentList.innerHTML = `
-
-            <div class="empty-message">
-                No absent students found.
-            </div>
-
-        `;
-
-        return;
+    if (!record) {
+        return false;
     }
 
-
-    // Newest first
-
-    records.sort(
-        (a, b) =>
-            Number(b.submittedAt || 0) -
-            Number(a.submittedAt || 0)
-    );
-
-
-    absentList.innerHTML = "";
-
-
-    records.forEach(record => {
-
-        const item =
-            document.createElement("div");
-
-
-        item.className =
-            "attendance-item";
-
-
-        const submittedTime =
-            record.submittedAt
-                ? formatDateTime(
-                    Number(record.submittedAt)
-                )
-                : "Unknown";
-
-
-        item.innerHTML = `
-
-            <div class="attendance-info">
-
-                <strong>
-                    ${escapeHtml(
-                        record.studentName
-                    )}
-                </strong>
-
-                <span>
-                    Group ${escapeHtml(
-                        String(record.group)
-                    )}
-                </span>
-
-                <small>
-                    ${submittedTime}
-                </small>
-
-            </div>
-
-            <button
-                class="delete-attendance-btn"
-                type="button"
-            >
-                Delete
-            </button>
-
-        `;
-
-
-        const deleteBtn =
-            item.querySelector(
-                ".delete-attendance-btn"
-            );
-
-
-        deleteBtn.addEventListener(
-            "click",
-            () => deleteAttendance(record)
-        );
-
-
-        absentList.appendChild(item);
-
-    });
-
-}
-
-
-// ============================================================
-// DELETE ATTENDANCE
-// ============================================================
-
-async function deleteAttendance(record) {
 
     if (
-        !record ||
-        !record.sessionId ||
-        !record.studentId
+        record.present === true
     ) {
-
-        return;
-
+        return true;
     }
 
 
-    const confirmed =
-        confirm(
-            `Delete absence record for ${record.studentName}?`
-        );
-
-
-    if (!confirmed) {
-        return;
+    if (
+        record.status === "present"
+    ) {
+        return true;
     }
 
 
-    try {
-
-        const attendanceRef =
-            ref(
-                db,
-                "attendance/" +
-                record.sessionId +
-                "/" +
-                record.studentId
-            );
-
-
-        await remove(
-            attendanceRef
-        );
-
-
-        alert(
-            "Attendance record deleted."
-        );
-
-
-        loadStatistics();
-
-
-    } catch (error) {
-
-        console.error(
-            "Delete attendance error:",
-            error
-        );
-
-        alert(
-            "Could not delete attendance record."
-        );
-
+    if (
+        record.status === "Present"
+    ) {
+        return true;
     }
 
+
+    if (
+        record.attended === true
+    ) {
+        return true;
+    }
+
+
+    return false;
 }
 
 
 // ============================================================
-// FORMAT DATE
+// TODAY
 // ============================================================
 
-function formatDate(timestamp) {
+function getTodayString() {
 
-    const date =
-        new Date(timestamp);
-
+    const today =
+        new Date();
 
     const year =
-        date.getFullYear();
-
+        today.getFullYear();
 
     const month =
         String(
-            date.getMonth() + 1
+            today.getMonth() + 1
         ).padStart(2, "0");
-
 
     const day =
         String(
-            date.getDate()
+            today.getDate()
         ).padStart(2, "0");
 
-
-    return `${year}-${month}-${day}`;
-
-}
-
-
-// ============================================================
-// FORMAT DATE + TIME
-// ============================================================
-
-function formatDateTime(timestamp) {
-
-    const date =
-        new Date(timestamp);
-
-
-    return date.toLocaleString(
-        undefined,
-        {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit"
-        }
+    return (
+        `${year}-${month}-${day}`
     );
-
 }
 
 
@@ -1578,139 +1401,9 @@ function formatDateTime(timestamp) {
 function escapeHtml(value) {
 
     return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
-
-
-// ============================================================
-// PERIODIC SESSION CHECK
-// ============================================================
-
-setInterval(
-    () => {
-
-        if (currentUser) {
-
-            checkExpiredSessions();
-
-        }
-
-    },
-    30000
-);
-
-
-// ============================================================
-// CHECK EXPIRED SESSIONS
-// ============================================================
-
-async function checkExpiredSessions() {
-
-    try {
-
-        const snapshot =
-            await get(
-                ref(db, "sessions")
-            );
-
-
-        if (!snapshot.exists()) {
-            return;
-        }
-
-
-        const sessions =
-            snapshot.val();
-
-
-        const now =
-            Date.now();
-
-
-        const changes = {};
-
-
-        Object.entries(sessions)
-            .forEach(
-                ([sessionId, session]) => {
-
-                    if (!session) return;
-
-
-                    if (
-                        session.active === true &&
-                        Number(session.endTime) <= now
-                    ) {
-
-                        changes[
-                            `sessions/${sessionId}/active`
-                        ] = false;
-
-                        changes[
-                            `sessions/${sessionId}/closedAt`
-                        ] = now;
-
-                    }
-
-                }
-            );
-
-
-        if (Object.keys(changes).length) {
-
-            await update(
-                ref(db),
-                changes
-            );
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Expired session check error:",
-            error
-        );
-
-    }
-
-}
-
-
-// ============================================================
-// ENTER KEY LOGIN
-// ============================================================
-
-if (passwordInput) {
-
-    passwordInput.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Enter" &&
-                loginBtn
-            ) {
-
-                loginBtn.click();
-
-            }
-
-        }
-    );
-
-}
-
-
-// ============================================================
-// INITIAL MESSAGE
-// ============================================================
-
-console.log(
-    "Mentoria Medicina Admin Panel loaded successfully."
-);
