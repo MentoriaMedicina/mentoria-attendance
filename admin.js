@@ -1,89 +1,58 @@
-// =====================================================
+// ============================================================
 // MENTORIA MEDICINA - ADMIN PANEL
-// Firebase Authentication + Firestore
-// =====================================================
+// Firebase Authentication + Realtime Database
+// ============================================================
 
-import { initializeApp } from
-"https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
 import {
     getAuth,
     signInWithEmailAndPassword,
     onAuthStateChanged,
     signOut
-} from
-"https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
-    getFirestore,
-    doc,
-    getDoc,
-    addDoc,
-    collection,
-    getDocs,
-    query,
-    where,
-    updateDoc,
-    deleteDoc,
-    serverTimestamp
-} from
-"https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    getDatabase,
+    ref,
+    get,
+    set,
+    push,
+    update,
+    remove,
+    onValue
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
 
-// =====================================================
+// ============================================================
 // FIREBASE CONFIG
-// =====================================================
+// ============================================================
 
 const firebaseConfig = {
     apiKey: "AIzaSyBPag4SLqUmdfAws0WFLV7FWp3X8_eLPQ",
     authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
+    databaseURL: "https://mentoria-medicina-attend-7d5ca-default-rtdb.firebaseio.com",
     projectId: "mentoria-medicina-attend-7d5ca",
     storageBucket: "mentoria-medicina-attend-7d5ca.firebasestorage.app",
     messagingSenderId: "238479536134",
-    appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387"
+    appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387",
+    measurementId: "G-WEVCZ0JG2K"
 };
 
 
-// =====================================================
+// ============================================================
 // INITIALIZE FIREBASE
-// =====================================================
+// ============================================================
 
 const app = initializeApp(firebaseConfig);
+
 const auth = getAuth(app);
-const db = getFirestore(app);
-
-console.log("Firebase initialized");
-console.log("Admin JS loaded");
+const db = getDatabase(app);
 
 
-// =====================================================
-// HTML ELEMENTS
-// =====================================================
-
-const loginSection = document.getElementById("loginSection");
-const adminDashboard = document.getElementById("adminDashboard");
-
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-
-const loginBtn = document.getElementById("loginBtn");
-const loginMessage = document.getElementById("loginMessage");
-
-const logoutBtn = document.getElementById("logoutBtn");
-const adminEmail = document.getElementById("adminEmail");
-
-const groupFilter = document.getElementById("groupFilter");
-const dateFilter = document.getElementById("dateFilter");
-
-const absentList = document.getElementById("absentList");
-
-const totalStudents = document.getElementById("totalStudents");
-const absentCount = document.getElementById("absentCount");
-
-
-// =====================================================
+// ============================================================
 // STUDENT GROUPS
-// =====================================================
+// ============================================================
 
 const groups = {
 
@@ -239,684 +208,522 @@ const groups = {
 };
 
 
-// =====================================================
-// LOGIN
-// =====================================================
+// ============================================================
+// HTML ELEMENTS
+// ============================================================
 
-if (loginBtn) {
+const loginSection = document.getElementById("loginSection");
+const adminDashboard = document.getElementById("adminDashboard");
 
-    loginBtn.addEventListener("click", loginAdmin);
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
 
+const loginBtn = document.getElementById("loginBtn");
+const loginMessage = document.getElementById("loginMessage");
+
+const adminEmail = document.getElementById("adminEmail");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const groupFilter = document.getElementById("groupFilter");
+const dateFilter = document.getElementById("dateFilter");
+
+const totalStudents = document.getElementById("totalStudents");
+const absentCount = document.getElementById("absentCount");
+const absentList = document.getElementById("absentList");
+
+
+// ============================================================
+// GLOBAL VARIABLES
+// ============================================================
+
+let currentUser = null;
+let attendanceListener = null;
+let sessionListener = null;
+
+
+// ============================================================
+// HELPER - SHOW MESSAGE
+// ============================================================
+
+function showLoginMessage(message, isError = true) {
+
+    if (!loginMessage) return;
+
+    loginMessage.textContent = message;
+
+    loginMessage.style.color = isError
+        ? "#d32f2f"
+        : "#2e7d32";
 }
 
 
-async function loginAdmin() {
+// ============================================================
+// HELPER - STUDENT ID
+// ============================================================
 
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
+function createStudentId(group, studentName) {
 
-    if (!email || !password) {
-
-        showLoginMessage(
-            "Please enter email and password.",
-            "red"
-        );
-
-        return;
-    }
-
-    loginBtn.disabled = true;
-    loginBtn.textContent = "Logging in...";
-
-    showLoginMessage(
-        "Checking account...",
-        "#1565c0"
+    return (
+        "grp_" +
+        group +
+        "_" +
+        studentName
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, "_")
+            .replace(/^_+|_+$/g, "")
     );
+}
 
-    try {
 
-        const userCredential =
+// ============================================================
+// LOGIN
+// ============================================================
+
+if (loginBtn) {
+
+    loginBtn.addEventListener("click", async () => {
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!email || !password) {
+
+            showLoginMessage("Please enter email and password.");
+
+            return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.textContent = "Logging in...";
+
+        showLoginMessage("", false);
+
+        try {
+
             await signInWithEmailAndPassword(
                 auth,
                 email,
                 password
             );
 
-        const user = userCredential.user;
+        } catch (error) {
 
-        console.log(
-            "Authentication successful:",
-            user.uid
-        );
+            console.error("Login error:", error);
 
-        await verifyAdmin(user);
+            let message = "Login failed.";
 
-    } catch (error) {
+            if (error.code === "auth/invalid-credential") {
+                message = "Invalid email or password.";
+            }
 
-        console.error(
-            "LOGIN ERROR:",
-            error
-        );
+            else if (error.code === "auth/user-not-found") {
+                message = "User not found.";
+            }
 
-        showLoginMessage(
-            getErrorMessage(error),
-            "red"
-        );
+            else if (error.code === "auth/wrong-password") {
+                message = "Wrong password.";
+            }
 
-        loginBtn.disabled = false;
-        loginBtn.textContent = "Login";
+            else if (error.code === "auth/invalid-email") {
+                message = "Invalid email address.";
+            }
 
-    }
+            else if (error.code === "auth/too-many-requests") {
+                message = "Too many attempts. Try again later.";
+            }
+
+            else if (error.code === "auth/api-key-not-valid") {
+                message = "Firebase API key is not valid.";
+            }
+
+            showLoginMessage(message);
+
+        } finally {
+
+            loginBtn.disabled = false;
+            loginBtn.textContent = "Login";
+
+        }
+
+    });
 
 }
 
 
-// =====================================================
-// VERIFY ADMIN
-// =====================================================
+// ============================================================
+// CHECK ADMIN PERMISSION
+// ============================================================
 
 async function verifyAdmin(user) {
 
     try {
 
-        const adminRef =
-            doc(
-                db,
-                "admins",
-                user.uid
-            );
+        const adminRef = ref(
+            db,
+            "admins/" + user.uid
+        );
 
-        const adminSnapshot =
-            await getDoc(adminRef);
+        const snapshot = await get(adminRef);
 
-
-        if (!adminSnapshot.exists()) {
+        if (!snapshot.exists()) {
 
             await signOut(auth);
 
             showLoginMessage(
-                "This account has no admin permission.",
-                "red"
+                "This account does not have admin permission."
             );
-
-            loginBtn.disabled = false;
-            loginBtn.textContent = "Login";
 
             return false;
         }
 
-
-        const adminData =
-            adminSnapshot.data();
-
+        const adminData = snapshot.val();
 
         if (
+            !adminData ||
             adminData.role !== "admin"
         ) {
 
             await signOut(auth);
 
             showLoginMessage(
-                "This account is not an admin.",
-                "red"
+                "This account does not have admin permission."
             );
-
-            loginBtn.disabled = false;
-            loginBtn.textContent = "Login";
 
             return false;
         }
 
-
-        console.log(
-            "Admin permission verified"
-        );
-
-
-        showDashboard(
-            user,
-            adminData
-        );
-
-
-        initializeDashboard();
-
-
         return true;
-
 
     } catch (error) {
 
         console.error(
-            "ADMIN CHECK ERROR:",
+            "Admin verification error:",
             error
         );
 
         showLoginMessage(
-            "Could not verify admin permission.",
-            "red"
+            "Unable to verify admin permission."
         );
-
-        loginBtn.disabled = false;
-        loginBtn.textContent = "Login";
 
         return false;
-
     }
-
 }
 
 
-// =====================================================
+// ============================================================
 // AUTH STATE
-// =====================================================
+// ============================================================
 
-onAuthStateChanged(
-    auth,
-    async (user) => {
+onAuthStateChanged(auth, async (user) => {
 
-        if (!user) {
+    if (!user) {
 
-            showLogin();
+        currentUser = null;
 
-            return;
+        if (loginSection) {
+            loginSection.style.display = "block";
         }
 
-
-        console.log(
-            "Existing login:",
-            user.email
-        );
-
-
-        await verifyAdmin(user);
-
-    }
-);
-
-
-// =====================================================
-// SHOW LOGIN
-// =====================================================
-
-function showLogin() {
-
-    if (loginSection) {
-
-        loginSection.style.display =
-            "flex";
-
-    }
-
-    if (adminDashboard) {
-
-        adminDashboard.style.display =
-            "none";
-
-    }
-
-}
-
-
-// =====================================================
-// SHOW DASHBOARD
-// =====================================================
-
-function showDashboard(
-    user,
-    adminData
-) {
-
-    if (loginSection) {
-
-        loginSection.style.display =
-            "none";
-
-    }
-
-    if (adminDashboard) {
-
-        adminDashboard.style.display =
-            "block";
-
-    }
-
-    if (adminEmail) {
-
-        adminEmail.textContent =
-            adminData.name ||
-            user.email;
-
-    }
-
-}
-
-
-// =====================================================
-// LOGIN MESSAGE
-// =====================================================
-
-function showLoginMessage(
-    message,
-    color
-) {
-
-    if (!loginMessage) return;
-
-    loginMessage.textContent =
-        message;
-
-    loginMessage.style.color =
-        color;
-
-}
-
-
-// =====================================================
-// ERROR MESSAGE
-// =====================================================
-
-function getErrorMessage(error) {
-
-    switch (error.code) {
-
-        case "auth/invalid-credential":
-            return "Incorrect email or password.";
-
-        case "auth/invalid-email":
-            return "Invalid email address.";
-
-        case "auth/user-not-found":
-            return "Account not found.";
-
-        case "auth/wrong-password":
-            return "Incorrect password.";
-
-        case "auth/too-many-requests":
-            return "Too many attempts. Try again later.";
-
-        case "auth/network-request-failed":
-            return "Network error. Check your internet.";
-
-        default:
-            return error.message ||
-                   "Login failed.";
-
-    }
-
-}
-
-
-// =====================================================
-// LOGOUT
-// =====================================================
-
-if (logoutBtn) {
-
-    logoutBtn.addEventListener(
-        "click",
-        async () => {
-
-            try {
-
-                await signOut(auth);
-
-                if (emailInput)
-                    emailInput.value = "";
-
-                if (passwordInput)
-                    passwordInput.value = "";
-
-                showLogin();
-
-                showLoginMessage(
-                    "",
-                    ""
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "LOGOUT ERROR:",
-                    error
-                );
-
-            }
-
+        if (adminDashboard) {
+            adminDashboard.style.display = "none";
         }
-    );
 
-}
-
-
-// =====================================================
-// INITIALIZE DASHBOARD
-// =====================================================
-
-let dashboardInitialized = false;
-
-
-function initializeDashboard() {
-
-    if (dashboardInitialized) {
         return;
     }
 
-    dashboardInitialized = true;
 
-    setupGroups();
+    const isAdmin = await verifyAdmin(user);
 
-    setupDate();
+    if (!isAdmin) {
+        return;
+    }
 
-    createSessionPanel();
 
-    loadAttendance();
+    currentUser = user;
+
+    if (loginSection) {
+        loginSection.style.display = "none";
+    }
+
+    if (adminDashboard) {
+        adminDashboard.style.display = "block";
+    }
+
+    if (adminEmail) {
+        adminEmail.textContent = user.email;
+    }
+
+
+    initializeDashboard();
+
+});
+
+
+// ============================================================
+// LOGOUT
+// ============================================================
+
+if (logoutBtn) {
+
+    logoutBtn.addEventListener("click", async () => {
+
+        try {
+
+            await signOut(auth);
+
+        } catch (error) {
+
+            console.error(
+                "Logout error:",
+                error
+            );
+
+        }
+
+    });
 
 }
 
 
-// =====================================================
-// GROUP FILTER
-// =====================================================
+// ============================================================
+// INITIALIZE DASHBOARD
+// ============================================================
 
-function setupGroups() {
+function initializeDashboard() {
+
+    setupGroupFilter();
+
+    setupDateFilter();
+
+    createSessionPanel();
+
+    startAttendanceListener();
+
+    startSessionListener();
+
+    loadStatistics();
+
+}
+
+
+// ============================================================
+// GROUP FILTER
+// ============================================================
+
+function setupGroupFilter() {
 
     if (!groupFilter) return;
 
-
     groupFilter.innerHTML = `
-
-        <option value="">
-            All Groups
-        </option>
-
-        <option value="7">
-            Group 7
-        </option>
-
-        <option value="9">
-            Group 9
-        </option>
-
-        <option value="10">
-            Group 10
-        </option>
-
-        <option value="11">
-            Group 11
-        </option>
-
-        <option value="12">
-            Group 12
-        </option>
-
-        <option value="13">
-            Group 13
-        </option>
-
-        <option value="15">
-            Group 15
-        </option>
-
+        <option value="all">All Groups</option>
     `;
+
+    Object.keys(groups)
+        .sort((a, b) => Number(a) - Number(b))
+        .forEach(group => {
+
+            const option =
+                document.createElement("option");
+
+            option.value = group;
+            option.textContent = "Group " + group;
+
+            groupFilter.appendChild(option);
+
+        });
 
 
     groupFilter.addEventListener(
         "change",
-        loadAttendance
+        () => {
+
+            loadStatistics();
+
+        }
     );
 
 }
 
 
-// =====================================================
+// ============================================================
 // DATE FILTER
-// =====================================================
+// ============================================================
 
-function setupDate() {
+function setupDateFilter() {
 
     if (!dateFilter) return;
 
+    const today = new Date();
+
+    const year =
+        today.getFullYear();
+
+    const month =
+        String(today.getMonth() + 1)
+            .padStart(2, "0");
+
+    const day =
+        String(today.getDate())
+            .padStart(2, "0");
 
     dateFilter.value =
-        todayString();
+        `${year}-${month}-${day}`;
 
 
     dateFilter.addEventListener(
         "change",
-        loadAttendance
+        () => {
+
+            loadStatistics();
+
+        }
     );
 
 }
 
 
-// =====================================================
+// ============================================================
 // CREATE SESSION PANEL
-// =====================================================
+// ============================================================
 
 function createSessionPanel() {
 
-    if (
-        document.getElementById(
-            "sessionPanel"
-        )
-    ) {
+    const dashboard =
+        document.querySelector(".dashboard-container");
 
-        checkActiveSession();
+    if (!dashboard) return;
 
-        return;
-    }
+
+    const existing =
+        document.getElementById("sessionPanel");
+
+    if (existing) return;
 
 
     const panel =
-        document.createElement("div");
+        document.createElement("section");
 
+    panel.id = "sessionPanel";
 
-    panel.id =
-        "sessionPanel";
-
-    panel.className =
-        "admin-card";
+    panel.className = "admin-card";
 
 
     panel.innerHTML = `
 
-        <h2>
-            Open Attendance
-        </h2>
+        <h2>Attendance Session</h2>
 
         <div class="session-controls">
 
             <label>
                 Group
-
                 <select id="sessionGroup">
-
-                    <option value="">
-                        Select Group
-                    </option>
-
-                    <option value="7">
-                        Group 7
-                    </option>
-
-                    <option value="9">
-                        Group 9
-                    </option>
-
-                    <option value="10">
-                        Group 10
-                    </option>
-
-                    <option value="11">
-                        Group 11
-                    </option>
-
-                    <option value="12">
-                        Group 12
-                    </option>
-
-                    <option value="13">
-                        Group 13
-                    </option>
-
-                    <option value="15">
-                        Group 15
-                    </option>
-
+                    <option value="">Select Group</option>
                 </select>
-
             </label>
-
 
             <label>
                 Duration
-
                 <select id="sessionDuration">
-
-                    <option value="10">
-                        10 minutes
-                    </option>
-
-                    <option value="15">
-                        15 minutes
-                    </option>
-
-                    <option value="20" selected>
-                        20 minutes
-                    </option>
-
-                    <option value="30">
-                        30 minutes
-                    </option>
-
-                    <option value="45">
-                        45 minutes
-                    </option>
-
-                    <option value="60">
-                        60 minutes
-                    </option>
-
+                    <option value="10">10 minutes</option>
+                    <option value="15">15 minutes</option>
+                    <option value="20" selected>20 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="45">45 minutes</option>
+                    <option value="60">60 minutes</option>
                 </select>
-
             </label>
-
 
             <button
                 id="openSessionBtn"
                 class="open-session-btn"
-                type="button">
-
-                Open Attendance
-
-            </button>
-
-
-            <button
-                id="closeSessionBtn"
-                class="close-session-btn"
                 type="button"
-                style="display:none;">
-
-                Close Attendance
-
+            >
+                Open Attendance
             </button>
 
         </div>
 
-
         <div
             id="sessionStatus"
-            class="session-status">
-
-            No active session.
-
+            class="session-status"
+        >
+            No active session
         </div>
 
     `;
 
 
-    const container =
-        document.querySelector(
-            ".dashboard-container"
-        );
+    dashboard.prepend(panel);
 
 
-    if (!container) {
-
-        console.error(
-            "dashboard-container not found"
-        );
-
-        return;
-    }
+    const sessionGroup =
+        document.getElementById("sessionGroup");
 
 
-    container.insertBefore(
-        panel,
-        container.firstChild
-    );
+    Object.keys(groups)
+        .sort((a, b) => Number(a) - Number(b))
+        .forEach(group => {
+
+            const option =
+                document.createElement("option");
+
+            option.value = group;
+
+            option.textContent =
+                "Group " + group;
+
+            sessionGroup.appendChild(option);
+
+        });
 
 
-    document
-        .getElementById(
+    const openBtn =
+        document.getElementById(
             "openSessionBtn"
-        )
-        .addEventListener(
-            "click",
-            openSession
         );
 
 
-    document
-        .getElementById(
-            "closeSessionBtn"
-        )
-        .addEventListener(
-            "click",
-            closeSession
-        );
-
-
-    checkActiveSession();
+    openBtn.addEventListener(
+        "click",
+        openSession
+    );
 
 }
 
 
-// =====================================================
-// OPEN SESSION
-// =====================================================
+// ============================================================
+// OPEN ATTENDANCE SESSION
+// ============================================================
 
 async function openSession() {
 
-    const group =
+    const sessionGroup =
         document.getElementById(
             "sessionGroup"
-        ).value;
+        );
 
+    const sessionDuration =
+        document.getElementById(
+            "sessionDuration"
+        );
+
+
+    if (!sessionGroup || !sessionDuration) {
+        return;
+    }
+
+
+    const group =
+        sessionGroup.value;
 
     const duration =
-        Number(
-            document.getElementById(
-                "sessionDuration"
-            ).value
-        );
-
-
-    const status =
-        document.getElementById(
-            "sessionStatus"
-        );
+        Number(sessionDuration.value);
 
 
     if (!group) {
 
-        status.textContent =
-            "Please select a group.";
-
-        status.className =
-            "session-status warning";
+        alert("Please select a group.");
 
         return;
     }
@@ -924,54 +731,79 @@ async function openSession() {
 
     try {
 
-        status.textContent =
-            "Opening attendance...";
+        // ----------------------------------------------------
+        // CHECK EXISTING SESSIONS
+        // ----------------------------------------------------
 
-        status.className =
-            "session-status";
-
-
-        const activeQuery =
-            query(
-                collection(
-                    db,
-                    "sessions"
-                ),
-                where(
-                    "active",
-                    "==",
-                    true
-                )
+        const sessionsSnapshot =
+            await get(
+                ref(db, "sessions")
             );
 
 
-        const activeSnapshot =
-            await getDocs(
-                activeQuery
+        const sessions =
+            sessionsSnapshot.exists()
+                ? sessionsSnapshot.val()
+                : {};
+
+
+        const now =
+            Date.now();
+
+
+        let activeSessionExists =
+            false;
+
+
+        Object.entries(sessions)
+            .forEach(
+                ([sessionId, session]) => {
+
+                    if (
+                        session &&
+                        session.active === true &&
+                        Number(session.endTime) > now
+                    ) {
+
+                        activeSessionExists = true;
+
+                    }
+
+                }
             );
 
 
-        if (!activeSnapshot.empty) {
+        if (activeSessionExists) {
 
-            status.textContent =
-                "Another attendance session is already open.";
-
-            status.className =
-                "session-status warning";
+            alert(
+                "An attendance session is already active."
+            );
 
             return;
         }
 
 
-        const start =
-            new Date();
+        // ----------------------------------------------------
+        // CREATE NEW SESSION
+        // ----------------------------------------------------
 
-
-        const end =
-            new Date(
-                start.getTime() +
-                duration * 60 * 1000
+        const sessionRef =
+            push(
+                ref(db, "sessions")
             );
+
+
+        const sessionId =
+            sessionRef.key;
+
+
+        const startTime =
+            Date.now();
+
+
+        const endTime =
+            startTime +
+            duration * 60 * 1000;
 
 
         const sessionData = {
@@ -980,275 +812,142 @@ async function openSession() {
 
             active: true,
 
-            startTime:
-                start.toISOString(),
+            startTime: startTime,
 
-            endTime:
-                end.toISOString(),
+            endTime: endTime,
 
-            duration:
-                duration,
+            duration: duration,
 
-            createdBy:
-                auth.currentUser.uid,
+            createdBy: currentUser.uid,
 
-            createdAt:
-                serverTimestamp()
+            createdAt: Date.now()
 
         };
 
 
-        const sessionRef =
-            await addDoc(
-                collection(
-                    db,
-                    "sessions"
-                ),
-                sessionData
-            );
-
-
-        console.log(
-            "Session created:",
-            sessionRef.id
+        await set(
+            sessionRef,
+            sessionData
         );
 
 
-        status.textContent =
-            `Group ${group} attendance is OPEN until ${formatTime(end)}.`;
-
-        status.className =
-            "session-status session-active";
-
-
-        setSessionControlsActive(
-            group,
-            duration
+        alert(
+            `Attendance opened for Group ${group} for ${duration} minutes.`
         );
-
-
-        groupFilter.value =
-            group;
-
-
-        await loadAttendance();
 
 
     } catch (error) {
 
         console.error(
-            "OPEN SESSION ERROR:",
+            "Open session error:",
             error
         );
 
-
-        status.textContent =
-            "Could not open session: " +
-            error.message;
-
-        status.className =
-            "session-status error";
+        alert(
+            "Could not open attendance session."
+        );
 
     }
 
 }
 
 
-// =====================================================
-// CHECK ACTIVE SESSION
-// =====================================================
+// ============================================================
+// SESSION REALTIME LISTENER
+// ============================================================
 
-async function checkActiveSession() {
+function startSessionListener() {
 
-    try {
-
-        const activeQuery =
-            query(
-                collection(
-                    db,
-                    "sessions"
-                ),
-                where(
-                    "active",
-                    "==",
-                    true
-                )
-            );
+    if (sessionListener) {
+        sessionListener();
+    }
 
 
-        const snapshot =
-            await getDocs(
-                activeQuery
-            );
+    const sessionsRef =
+        ref(db, "sessions");
 
 
-        if (snapshot.empty) {
+    sessionListener =
+        onValue(
+            sessionsRef,
+            async (snapshot) => {
 
-            resetSession();
-
-            return;
-        }
-
-
-        const sessionDoc =
-            snapshot.docs[0];
-
-
-        const session =
-            sessionDoc.data();
+                const sessions =
+                    snapshot.exists()
+                        ? snapshot.val()
+                        : {};
 
 
-        const now =
-            new Date();
+                const now =
+                    Date.now();
 
 
-        const end =
-            new Date(
-                session.endTime
-            );
+                let activeSession = null;
 
 
-        if (
-            now >= end
-        ) {
+                for (
+                    const [sessionId, session]
+                    of Object.entries(sessions)
+                ) {
 
-            await updateDoc(
-                doc(
-                    db,
-                    "sessions",
-                    sessionDoc.id
-                ),
-                {
-                    active: false
+                    if (!session) continue;
+
+
+                    if (
+                        session.active === true &&
+                        Number(session.endTime) <= now
+                    ) {
+
+                        // Automatically close expired session
+
+                        await update(
+                            ref(
+                                db,
+                                "sessions/" + sessionId
+                            ),
+                            {
+                                active: false,
+                                closedAt: Date.now()
+                            }
+                        );
+
+                        continue;
+                    }
+
+
+                    if (
+                        session.active === true &&
+                        Number(session.endTime) > now
+                    ) {
+
+                        activeSession = {
+
+                            id: sessionId,
+
+                            ...session
+
+                        };
+
+                    }
+
                 }
-            );
 
 
-            resetSession();
+                displaySessionStatus(
+                    activeSession
+                );
 
-            return;
-        }
-
-
-        const remaining =
-            Math.ceil(
-                (
-                    end.getTime() -
-                    now.getTime()
-                ) / 60000
-            );
-
-
-        const status =
-            document.getElementById(
-                "sessionStatus"
-            );
-
-
-        if (status) {
-
-            status.textContent =
-                `Group ${session.group} attendance is OPEN. ${remaining} minute(s) remaining.`;
-
-            status.className =
-                "session-status session-active";
-
-        }
-
-
-        setSessionControlsActive(
-            session.group,
-            session.duration
+            }
         );
-
-
-    } catch (error) {
-
-        console.error(
-            "CHECK SESSION ERROR:",
-            error
-        );
-
-    }
 
 }
 
 
-// =====================================================
-// SET SESSION CONTROLS
-// =====================================================
+// ============================================================
+// DISPLAY SESSION STATUS
+// ============================================================
 
-function setSessionControlsActive(
-    group,
-    duration
-) {
-
-    const groupSelect =
-        document.getElementById(
-            "sessionGroup"
-        );
-
-    const durationSelect =
-        document.getElementById(
-            "sessionDuration"
-        );
-
-    const openBtn =
-        document.getElementById(
-            "openSessionBtn"
-        );
-
-    const closeBtn =
-        document.getElementById(
-            "closeSessionBtn"
-        );
-
-
-    if (groupSelect) {
-
-        groupSelect.value =
-            group;
-
-        groupSelect.disabled =
-            true;
-
-    }
-
-
-    if (durationSelect) {
-
-        durationSelect.value =
-            String(duration);
-
-        durationSelect.disabled =
-            true;
-
-    }
-
-
-    if (openBtn) {
-
-        openBtn.style.display =
-            "none";
-
-    }
-
-
-    if (closeBtn) {
-
-        closeBtn.style.display =
-            "inline-block";
-
-    }
-
-}
-
-
-// =====================================================
-// RESET SESSION
-// =====================================================
-
-function resetSession() {
+function displaySessionStatus(session) {
 
     const status =
         document.getElementById(
@@ -1256,20 +955,76 @@ function resetSession() {
         );
 
 
-    const groupSelect =
-        document.getElementById(
-            "sessionGroup"
-        );
-
-    const durationSelect =
-        document.getElementById(
-            "sessionDuration"
-        );
-
     const openBtn =
         document.getElementById(
             "openSessionBtn"
         );
+
+
+    if (!status) return;
+
+
+    if (!session) {
+
+        status.innerHTML = `
+            <strong>No active attendance session.</strong>
+        `;
+
+        if (openBtn) {
+            openBtn.disabled = false;
+        }
+
+        return;
+    }
+
+
+    const remaining =
+        Math.max(
+            0,
+            Number(session.endTime) -
+            Date.now()
+        );
+
+
+    const minutes =
+        Math.ceil(
+            remaining / 60000
+        );
+
+
+    status.innerHTML = `
+
+        <strong>
+            🟢 Attendance is OPEN
+        </strong>
+
+        <br>
+
+        Group:
+        <strong>${session.group}</strong>
+
+        <br>
+
+        Time remaining:
+        <strong>${minutes} minute(s)</strong>
+
+        <br>
+
+        <button
+            id="closeSessionBtn"
+            class="close-session-btn"
+            type="button"
+        >
+            Close Session
+        </button>
+
+    `;
+
+
+    if (openBtn) {
+        openBtn.disabled = true;
+    }
+
 
     const closeBtn =
         document.getElementById(
@@ -1277,412 +1032,441 @@ function resetSession() {
         );
 
 
-    if (status) {
-
-        status.textContent =
-            "No active session.";
-
-        status.className =
-            "session-status";
-
-    }
-
-
-    if (groupSelect) {
-
-        groupSelect.disabled =
-            false;
-
-        groupSelect.value =
-            "";
-
-    }
-
-
-    if (durationSelect) {
-
-        durationSelect.disabled =
-            false;
-
-    }
-
-
-    if (openBtn) {
-
-        openBtn.style.display =
-            "inline-block";
-
-    }
-
-
     if (closeBtn) {
 
-        closeBtn.style.display =
-            "none";
+        closeBtn.addEventListener(
+            "click",
+            () => closeSession(session.id)
+        );
 
     }
 
 }
 
 
-// =====================================================
+// ============================================================
 // CLOSE SESSION
-// =====================================================
+// ============================================================
 
-async function closeSession() {
+async function closeSession(sessionId) {
+
+    if (!sessionId) return;
+
+
+    const confirmClose =
+        confirm(
+            "Close this attendance session?"
+        );
+
+
+    if (!confirmClose) {
+        return;
+    }
+
 
     try {
 
-        const activeQuery =
-            query(
-                collection(
-                    db,
-                    "sessions"
-                ),
-                where(
-                    "active",
-                    "==",
-                    true
-                )
-            );
+        await update(
+            ref(
+                db,
+                "sessions/" + sessionId
+            ),
+            {
+                active: false,
+                closedAt: Date.now()
+            }
+        );
 
 
-        const snapshot =
-            await getDocs(
-                activeQuery
-            );
-
-
-        if (snapshot.empty) {
-
-            resetSession();
-
-            return;
-        }
-
-
-        for (
-            const sessionDoc
-            of snapshot.docs
-        ) {
-
-            await updateDoc(
-                doc(
-                    db,
-                    "sessions",
-                    sessionDoc.id
-                ),
-                {
-                    active: false,
-                    closedAt:
-                        serverTimestamp(),
-                    closedBy:
-                        auth.currentUser.uid
-                }
-            );
-
-        }
-
-
-        resetSession();
-
-
-        await loadAttendance();
+        alert(
+            "Attendance session closed."
+        );
 
 
     } catch (error) {
 
         console.error(
-            "CLOSE SESSION ERROR:",
+            "Close session error:",
             error
         );
 
-
-        const status =
-            document.getElementById(
-                "sessionStatus"
-            );
-
-
-        if (status) {
-
-            status.textContent =
-                "Could not close attendance.";
-
-            status.className =
-                "session-status error";
-
-        }
+        alert(
+            "Could not close the session."
+        );
 
     }
 
 }
 
 
-// =====================================================
-// LOAD ATTENDANCE
-// =====================================================
+// ============================================================
+// ATTENDANCE REALTIME LISTENER
+// ============================================================
 
-async function loadAttendance() {
+function startAttendanceListener() {
 
-    if (!absentList) return;
+    if (attendanceListener) {
+        attendanceListener();
+    }
 
 
-    absentList.innerHTML =
-        "<p>Loading...</p>";
+    const attendanceRef =
+        ref(db, "attendance");
 
+
+    attendanceListener =
+        onValue(
+            attendanceRef,
+            () => {
+
+                loadStatistics();
+
+            }
+        );
+
+}
+
+
+// ============================================================
+// LOAD STATISTICS
+// ============================================================
+
+async function loadStatistics() {
 
     try {
 
         const selectedGroup =
             groupFilter
                 ? groupFilter.value
-                : "";
+                : "all";
 
 
         const selectedDate =
             dateFilter
                 ? dateFilter.value
-                : todayString();
+                : "";
 
 
-        const attendanceSnapshot =
-            await getDocs(
-                collection(
-                    db,
-                    "attendance"
-                )
+        // ----------------------------------------------------
+        // TOTAL STUDENTS
+        // ----------------------------------------------------
+
+        let total = 0;
+
+
+        if (selectedGroup === "all") {
+
+            Object.values(groups)
+                .forEach(
+                    group =>
+                        total += group.length
+                );
+
+        } else {
+
+            total =
+                groups[selectedGroup]
+                    ? groups[selectedGroup].length
+                    : 0;
+
+        }
+
+
+        if (totalStudents) {
+
+            totalStudents.textContent =
+                total;
+
+        }
+
+
+        // ----------------------------------------------------
+        // LOAD SESSIONS
+        // ----------------------------------------------------
+
+        const sessionsSnapshot =
+            await get(
+                ref(db, "sessions")
             );
 
 
-        const records = [];
+        const attendanceSnapshot =
+            await get(
+                ref(db, "attendance")
+            );
 
 
-        attendanceSnapshot.forEach(
-            attendanceDoc => {
-
-                const data =
-                    attendanceDoc.data();
-
-
-                if (
-                    selectedGroup &&
-                    String(data.group) !==
-                    String(selectedGroup)
-                ) {
-
-                    return;
-                }
+        const sessions =
+            sessionsSnapshot.exists()
+                ? sessionsSnapshot.val()
+                : {};
 
 
-                if (
-                    selectedDate &&
-                    !isSameDate(
-                        data.submittedAt,
+        const attendance =
+            attendanceSnapshot.exists()
+                ? attendanceSnapshot.val()
+                : {};
+
+
+        const absentRecords = [];
+
+
+        // ----------------------------------------------------
+        // FIND ATTENDANCE RECORDS
+        // ----------------------------------------------------
+
+        Object.entries(attendance)
+            .forEach(
+                ([sessionId, sessionAttendance]) => {
+
+                    const session =
+                        sessions[sessionId];
+
+
+                    if (!session) return;
+
+
+                    const sessionGroup =
+                        String(session.group);
+
+
+                    if (
+                        selectedGroup !== "all" &&
+                        sessionGroup !==
+                        String(selectedGroup)
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    const sessionDate =
+                        formatDate(
+                            Number(
+                                session.startTime
+                            )
+                        );
+
+
+                    if (
+                        selectedDate &&
+                        sessionDate !==
                         selectedDate
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    if (!sessionAttendance) {
+                        return;
+                    }
+
+
+                    Object.entries(
+                        sessionAttendance
                     )
-                ) {
+                    .forEach(
+                        ([studentId, record]) => {
 
-                    return;
+                            if (!record) return;
+
+
+                            absentRecords.push({
+
+                                sessionId:
+                                    sessionId,
+
+                                studentId:
+                                    studentId,
+
+                                studentName:
+                                    record.studentName ||
+                                    "Unknown",
+
+                                group:
+                                    record.group ||
+                                    sessionGroup,
+
+                                status:
+                                    record.status ||
+                                    "absent",
+
+                                submittedAt:
+                                    record.submittedAt ||
+                                    null,
+
+                                sessionStart:
+                                    session.startTime
+
+                            });
+
+                        }
+                    );
+
                 }
+            );
 
 
-                records.push({
+        // ----------------------------------------------------
+        // DISPLAY ABSENT COUNT
+        // ----------------------------------------------------
 
-                    id:
-                        attendanceDoc.id,
+        if (absentCount) {
 
-                    ...data
+            absentCount.textContent =
+                absentRecords.length;
 
-                });
-
-            }
-        );
-
-
-        records.sort(
-            (a, b) => {
-
-                const dateA =
-                    getDateValue(
-                        a.submittedAt
-                    );
-
-                const dateB =
-                    getDateValue(
-                        b.submittedAt
-                    );
-
-                return dateB - dateA;
-
-            }
-        );
+        }
 
 
-        const total =
-            selectedGroup
-                ? groups[selectedGroup].length
-                : Object.values(groups)
-                    .reduce(
-                        (sum, group) =>
-                            sum + group.length,
-                        0
-                    );
+        // ----------------------------------------------------
+        // DISPLAY LIST
+        // ----------------------------------------------------
 
-
-        totalStudents.textContent =
-            total;
-
-
-        absentCount.textContent =
-            records.length;
-
-
-        displayAttendance(
-            records
+        displayAbsentList(
+            absentRecords
         );
 
 
     } catch (error) {
 
         console.error(
-            "LOAD ATTENDANCE ERROR:",
+            "Load statistics error:",
             error
         );
-
-
-        absentList.innerHTML = `
-            <p class="error">
-                Could not load attendance.
-            </p>
-        `;
 
     }
 
 }
 
 
-// =====================================================
-// DISPLAY ATTENDANCE
-// =====================================================
+// ============================================================
+// DISPLAY ABSENT LIST
+// ============================================================
 
-function displayAttendance(
-    records
-) {
+function displayAbsentList(records) {
+
+    if (!absentList) return;
+
 
     if (!records.length) {
 
         absentList.innerHTML = `
+
             <div class="empty-message">
                 No absent students found.
             </div>
+
         `;
 
         return;
     }
 
 
+    // Newest first
+
+    records.sort(
+        (a, b) =>
+            Number(b.submittedAt || 0) -
+            Number(a.submittedAt || 0)
+    );
+
+
     absentList.innerHTML = "";
 
 
-    records.forEach(
-        record => {
+    records.forEach(record => {
 
-            const item =
-                document.createElement(
-                    "div"
-                );
+        const item =
+            document.createElement("div");
 
 
-            item.className =
-                "attendance-item";
+        item.className =
+            "attendance-item";
 
 
-            const time =
-                formatDateTime(
-                    record.submittedAt
-                );
+        const submittedTime =
+            record.submittedAt
+                ? formatDateTime(
+                    Number(record.submittedAt)
+                )
+                : "Unknown";
 
 
-            item.innerHTML = `
+        item.innerHTML = `
 
-                <div>
+            <div class="attendance-info">
 
-                    <strong>
-                        ${escapeHtml(
-                            record.studentName ||
-                            "Unknown Student"
-                        )}
-                    </strong>
+                <strong>
+                    ${escapeHtml(
+                        record.studentName
+                    )}
+                </strong>
 
-                    <div>
-                        Group ${escapeHtml(
-                            String(
-                                record.group || ""
-                            )
-                        )}
-                    </div>
+                <span>
+                    Group ${escapeHtml(
+                        String(record.group)
+                    )}
+                </span>
 
-                    <small>
-                        ${time}
-                    </small>
+                <small>
+                    ${submittedTime}
+                </small>
 
-                </div>
+            </div>
 
+            <button
+                class="delete-attendance-btn"
+                type="button"
+            >
+                Delete
+            </button>
 
-                <button
-                    class="delete-attendance-btn"
-                    type="button">
-
-                    Delete
-
-                </button>
-
-            `;
+        `;
 
 
-            const deleteBtn =
-                item.querySelector(
-                    ".delete-attendance-btn"
-                );
-
-
-            deleteBtn.addEventListener(
-                "click",
-                () => {
-
-                    deleteAttendance(
-                        record.id
-                    );
-
-                }
+        const deleteBtn =
+            item.querySelector(
+                ".delete-attendance-btn"
             );
 
 
-            absentList.appendChild(
-                item
-            );
+        deleteBtn.addEventListener(
+            "click",
+            () => deleteAttendance(record)
+        );
 
-        }
-    );
+
+        absentList.appendChild(item);
+
+    });
 
 }
 
 
-// =====================================================
+// ============================================================
 // DELETE ATTENDANCE
-// =====================================================
+// ============================================================
 
-async function deleteAttendance(
-    attendanceId
-) {
+async function deleteAttendance(record) {
 
-    if (!attendanceId) return;
+    if (
+        !record ||
+        !record.sessionId ||
+        !record.studentId
+    ) {
+
+        return;
+
+    }
 
 
     const confirmed =
         confirm(
-            "Delete this absence record?"
+            `Delete absence record for ${record.studentName}?`
         );
 
 
@@ -1693,28 +1477,38 @@ async function deleteAttendance(
 
     try {
 
-        await deleteDoc(
-            doc(
+        const attendanceRef =
+            ref(
                 db,
-                "attendance",
-                attendanceId
-            )
+                "attendance/" +
+                record.sessionId +
+                "/" +
+                record.studentId
+            );
+
+
+        await remove(
+            attendanceRef
         );
 
 
-        await loadAttendance();
+        alert(
+            "Attendance record deleted."
+        );
+
+
+        loadStatistics();
 
 
     } catch (error) {
 
         console.error(
-            "DELETE ATTENDANCE ERROR:",
+            "Delete attendance error:",
             error
         );
 
-
         alert(
-            "Could not delete the record."
+            "Could not delete attendance record."
         );
 
     }
@@ -1722,72 +1516,14 @@ async function deleteAttendance(
 }
 
 
-// =====================================================
-// DATE HELPERS
-// =====================================================
+// ============================================================
+// FORMAT DATE
+// ============================================================
 
-function todayString() {
-
-    const now =
-        new Date();
-
-
-    const year =
-        now.getFullYear();
-
-
-    const month =
-        String(
-            now.getMonth() + 1
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    const day =
-        String(
-            now.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    return (
-        year +
-        "-" +
-        month +
-        "-" +
-        day
-    );
-
-}
-
-
-// =====================================================
-// CHECK SAME DATE
-// =====================================================
-
-function isSameDate(
-    timestamp,
-    selectedDate
-) {
-
-    if (!timestamp) {
-        return false;
-    }
-
+function formatDate(timestamp) {
 
     const date =
-        getDateObject(
-            timestamp
-        );
-
-
-    if (!date) {
-        return false;
-    }
+        new Date(timestamp);
 
 
     const year =
@@ -1797,148 +1533,32 @@ function isSameDate(
     const month =
         String(
             date.getMonth() + 1
-        ).padStart(
-            2,
-            "0"
-        );
+        ).padStart(2, "0");
 
 
     const day =
         String(
             date.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
+        ).padStart(2, "0");
 
 
-    const dateString =
-        `${year}-${month}-${day}`;
-
-
-    return (
-        dateString ===
-        selectedDate
-    );
+    return `${year}-${month}-${day}`;
 
 }
 
 
-// =====================================================
-// DATE OBJECT
-// =====================================================
-
-function getDateObject(
-    value
-) {
-
-    if (!value) {
-        return null;
-    }
-
-
-    if (
-        typeof value.toDate ===
-        "function"
-    ) {
-
-        return value.toDate();
-
-    }
-
-
-    if (
-        value instanceof Date
-    ) {
-
-        return value;
-
-    }
-
-
-    const date =
-        new Date(value);
-
-
-    if (
-        isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return null;
-
-    }
-
-
-    return date;
-
-}
-
-
-// =====================================================
-// DATE VALUE
-// =====================================================
-
-function getDateValue(
-    value
-) {
-
-    const date =
-        getDateObject(
-            value
-        );
-
-
-    return date
-        ? date.getTime()
-        : 0;
-
-}
-
-
-// =====================================================
-// FORMAT TIME
-// =====================================================
-
-function formatTime(
-    date
-) {
-
-    return date.toLocaleTimeString(
-        [],
-        {
-            hour: "2-digit",
-            minute: "2-digit"
-        }
-    );
-
-}
-
-
-// =====================================================
+// ============================================================
 // FORMAT DATE + TIME
-// =====================================================
+// ============================================================
 
-function formatDateTime(
-    value
-) {
+function formatDateTime(timestamp) {
 
     const date =
-        getDateObject(
-            value
-        );
-
-
-    if (!date) {
-
-        return "Time unavailable";
-
-    }
+        new Date(timestamp);
 
 
     return date.toLocaleString(
-        [],
+        undefined,
         {
             year: "numeric",
             month: "short",
@@ -1951,53 +1571,32 @@ function formatDateTime(
 }
 
 
-// =====================================================
+// ============================================================
 // ESCAPE HTML
-// =====================================================
+// ============================================================
 
-function escapeHtml(
-    value
-) {
+function escapeHtml(value) {
 
     return String(value)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
 }
 
 
-// =====================================================
-// AUTOMATIC SESSION CHECK
-// =====================================================
+// ============================================================
+// PERIODIC SESSION CHECK
+// ============================================================
 
 setInterval(
-    async () => {
+    () => {
 
-        if (
-            auth.currentUser
-        ) {
+        if (currentUser) {
 
-            await checkActiveSession();
-
-            await loadAttendance();
+            checkExpiredSessions();
 
         }
 
@@ -2006,9 +1605,112 @@ setInterval(
 );
 
 
-// =====================================================
-// INITIAL STATE
-// =====================================================
+// ============================================================
+// CHECK EXPIRED SESSIONS
+// ============================================================
 
-showLogin();
-    
+async function checkExpiredSessions() {
+
+    try {
+
+        const snapshot =
+            await get(
+                ref(db, "sessions")
+            );
+
+
+        if (!snapshot.exists()) {
+            return;
+        }
+
+
+        const sessions =
+            snapshot.val();
+
+
+        const now =
+            Date.now();
+
+
+        const changes = {};
+
+
+        Object.entries(sessions)
+            .forEach(
+                ([sessionId, session]) => {
+
+                    if (!session) return;
+
+
+                    if (
+                        session.active === true &&
+                        Number(session.endTime) <= now
+                    ) {
+
+                        changes[
+                            `sessions/${sessionId}/active`
+                        ] = false;
+
+                        changes[
+                            `sessions/${sessionId}/closedAt`
+                        ] = now;
+
+                    }
+
+                }
+            );
+
+
+        if (Object.keys(changes).length) {
+
+            await update(
+                ref(db),
+                changes
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Expired session check error:",
+            error
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// ENTER KEY LOGIN
+// ============================================================
+
+if (passwordInput) {
+
+    passwordInput.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Enter" &&
+                loginBtn
+            ) {
+
+                loginBtn.click();
+
+            }
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// INITIAL MESSAGE
+// ============================================================
+
+console.log(
+    "Mentoria Medicina Admin Panel loaded successfully."
+);
