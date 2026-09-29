@@ -35,24 +35,12 @@ import {
 // =====================================================
 
 const firebaseConfig = {
-
-    apiKey: "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPQ",
-
-    authDomain:
-        "mentoria-medicina-attend-7d5ca.firebaseapp.com",
-
-    projectId:
-        "mentoria-medicina-attend-7d5ca",
-
-    storageBucket:
-        "mentoria-medicina-attend-7d5ca.firebasestorage.app",
-
-    messagingSenderId:
-        "238479536134",
-
-    appId:
-        "1:238479536134:web:3ff9a57dc1cb70dc8c9387"
-
+    apiKey: "AIzaSyBPag4SLqUmdfAws0WFLV7FWp3X8_eLPQ",
+    authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
+    projectId: "mentoria-medicina-attend-7d5ca",
+    storageBucket: "mentoria-medicina-attend-7d5ca.firebasestorage.app",
+    messagingSenderId: "238479536134",
+    appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387"
 };
 
 
@@ -61,9 +49,7 @@ const firebaseConfig = {
 // =====================================================
 
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
-
 const db = getFirestore(app);
 
 console.log("Firebase initialized");
@@ -74,44 +60,25 @@ console.log("Admin JS loaded");
 // HTML ELEMENTS
 // =====================================================
 
-const loginSection =
-    document.getElementById("loginSection");
+const loginSection = document.getElementById("loginSection");
+const adminDashboard = document.getElementById("adminDashboard");
 
-const adminDashboard =
-    document.getElementById("adminDashboard");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
 
-const emailInput =
-    document.getElementById("email");
+const loginBtn = document.getElementById("loginBtn");
+const loginMessage = document.getElementById("loginMessage");
 
-const passwordInput =
-    document.getElementById("password");
+const logoutBtn = document.getElementById("logoutBtn");
+const adminEmail = document.getElementById("adminEmail");
 
-const loginBtn =
-    document.getElementById("loginBtn");
+const groupFilter = document.getElementById("groupFilter");
+const dateFilter = document.getElementById("dateFilter");
 
-const loginMessage =
-    document.getElementById("loginMessage");
+const absentList = document.getElementById("absentList");
 
-const logoutBtn =
-    document.getElementById("logoutBtn");
-
-const adminEmail =
-    document.getElementById("adminEmail");
-
-const groupFilter =
-    document.getElementById("groupFilter");
-
-const dateFilter =
-    document.getElementById("dateFilter");
-
-const absentList =
-    document.getElementById("absentList");
-
-const totalStudents =
-    document.getElementById("totalStudents");
-
-const absentCount =
-    document.getElementById("absentCount");
+const totalStudents = document.getElementById("totalStudents");
+const absentCount = document.getElementById("absentCount");
 
 
 // =====================================================
@@ -276,38 +243,35 @@ const groups = {
 // LOGIN
 // =====================================================
 
-loginBtn.addEventListener("click", async () => {
+if (loginBtn) {
 
-    const email =
-        emailInput.value.trim();
+    loginBtn.addEventListener("click", loginAdmin);
 
-    const password =
-        passwordInput.value;
+}
+
+
+async function loginAdmin() {
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
 
     if (!email || !password) {
 
-        loginMessage.textContent =
-            "Please enter email and password.";
-
-        loginMessage.style.color =
-            "red";
+        showLoginMessage(
+            "Please enter email and password.",
+            "red"
+        );
 
         return;
     }
 
-
     loginBtn.disabled = true;
+    loginBtn.textContent = "Logging in...";
 
-    loginBtn.textContent =
-        "Logging in...";
-
-
-    loginMessage.textContent =
-        "Checking account...";
-
-    loginMessage.style.color =
-        "#1565c0";
-
+    showLoginMessage(
+        "Checking account...",
+        "#1565c0"
+    );
 
     try {
 
@@ -318,18 +282,42 @@ loginBtn.addEventListener("click", async () => {
                 password
             );
 
-
-        const user =
-            userCredential.user;
-
+        const user = userCredential.user;
 
         console.log(
             "Authentication successful:",
             user.uid
         );
 
+        await verifyAdmin(user);
 
-        // Check admins collection
+    } catch (error) {
+
+        console.error(
+            "LOGIN ERROR:",
+            error
+        );
+
+        showLoginMessage(
+            getErrorMessage(error),
+            "red"
+        );
+
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
+
+    }
+
+}
+
+
+// =====================================================
+// VERIFY ADMIN
+// =====================================================
+
+async function verifyAdmin(user) {
+
+    try {
 
         const adminRef =
             doc(
@@ -337,7 +325,6 @@ loginBtn.addEventListener("click", async () => {
                 "admins",
                 user.uid
             );
-
 
         const adminSnapshot =
             await getDoc(adminRef);
@@ -347,13 +334,15 @@ loginBtn.addEventListener("click", async () => {
 
             await signOut(auth);
 
-            loginMessage.textContent =
-                "Login successful, but this account has no admin permission.";
+            showLoginMessage(
+                "This account has no admin permission.",
+                "red"
+            );
 
-            loginMessage.style.color =
-                "red";
+            loginBtn.disabled = false;
+            loginBtn.textContent = "Login";
 
-            return;
+            return false;
         }
 
 
@@ -361,17 +350,21 @@ loginBtn.addEventListener("click", async () => {
             adminSnapshot.data();
 
 
-        if (adminData.role !== "admin") {
+        if (
+            adminData.role !== "admin"
+        ) {
 
             await signOut(auth);
 
-            loginMessage.textContent =
-                "This account is not an admin.";
+            showLoginMessage(
+                "This account is not an admin.",
+                "red"
+            );
 
-            loginMessage.style.color =
-                "red";
+            loginBtn.disabled = false;
+            loginBtn.textContent = "Login";
 
-            return;
+            return false;
         }
 
 
@@ -380,36 +373,38 @@ loginBtn.addEventListener("click", async () => {
         );
 
 
-        loginMessage.textContent =
-            "Login successful.";
+        showDashboard(
+            user,
+            adminData
+        );
 
-        loginMessage.style.color =
-            "green";
+
+        initializeDashboard();
+
+
+        return true;
 
 
     } catch (error) {
 
         console.error(
-            "LOGIN ERROR:",
+            "ADMIN CHECK ERROR:",
             error
         );
 
+        showLoginMessage(
+            "Could not verify admin permission.",
+            "red"
+        );
 
-        loginMessage.textContent =
-            getErrorMessage(error);
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
 
-        loginMessage.style.color =
-            "red";
+        return false;
 
     }
 
-
-    loginBtn.disabled = false;
-
-    loginBtn.textContent =
-        "Login";
-
-});
+}
 
 
 // =====================================================
@@ -429,85 +424,12 @@ onAuthStateChanged(
 
 
         console.log(
-            "User already logged in:",
+            "Existing login:",
             user.email
         );
 
 
-        try {
-
-            const adminRef =
-                doc(
-                    db,
-                    "admins",
-                    user.uid
-                );
-
-
-            const adminSnapshot =
-                await getDoc(adminRef);
-
-
-            if (!adminSnapshot.exists()) {
-
-                await signOut(auth);
-
-                showLogin();
-
-                loginMessage.textContent =
-                    "This account does not have admin permission.";
-
-                loginMessage.style.color =
-                    "red";
-
-                return;
-            }
-
-
-            const adminData =
-                adminSnapshot.data();
-
-
-            if (adminData.role !== "admin") {
-
-                await signOut(auth);
-
-                showLogin();
-
-                loginMessage.textContent =
-                    "This account is not an admin.";
-
-                loginMessage.style.color =
-                    "red";
-
-                return;
-            }
-
-
-            showDashboard(
-                user,
-                adminData
-            );
-
-
-            initializeDashboard();
-
-
-        } catch (error) {
-
-            console.error(
-                "ADMIN CHECK ERROR:",
-                error
-            );
-
-            showLogin();
-
-            loginMessage.textContent =
-                "Could not verify admin permission.";
-
-            loginMessage.style.color =
-                "red";
-        }
+        await verifyAdmin(user);
 
     }
 );
@@ -519,11 +441,19 @@ onAuthStateChanged(
 
 function showLogin() {
 
-    loginSection.style.display =
-        "flex";
+    if (loginSection) {
 
-    adminDashboard.style.display =
-        "none";
+        loginSection.style.display =
+            "flex";
+
+    }
+
+    if (adminDashboard) {
+
+        adminDashboard.style.display =
+            "none";
+
+    }
 
 }
 
@@ -537,16 +467,82 @@ function showDashboard(
     adminData
 ) {
 
-    loginSection.style.display =
-        "none";
+    if (loginSection) {
 
-    adminDashboard.style.display =
-        "block";
+        loginSection.style.display =
+            "none";
+
+    }
+
+    if (adminDashboard) {
+
+        adminDashboard.style.display =
+            "block";
+
+    }
+
+    if (adminEmail) {
+
+        adminEmail.textContent =
+            adminData.name ||
+            user.email;
+
+    }
+
+}
 
 
-    adminEmail.textContent =
-        adminData.name ||
-        user.email;
+// =====================================================
+// LOGIN MESSAGE
+// =====================================================
+
+function showLoginMessage(
+    message,
+    color
+) {
+
+    if (!loginMessage) return;
+
+    loginMessage.textContent =
+        message;
+
+    loginMessage.style.color =
+        color;
+
+}
+
+
+// =====================================================
+// ERROR MESSAGE
+// =====================================================
+
+function getErrorMessage(error) {
+
+    switch (error.code) {
+
+        case "auth/invalid-credential":
+            return "Incorrect email or password.";
+
+        case "auth/invalid-email":
+            return "Invalid email address.";
+
+        case "auth/user-not-found":
+            return "Account not found.";
+
+        case "auth/wrong-password":
+            return "Incorrect password.";
+
+        case "auth/too-many-requests":
+            return "Too many attempts. Try again later.";
+
+        case "auth/network-request-failed":
+            return "Network error. Check your internet.";
+
+        default:
+            return error.message ||
+                   "Login failed.";
+
+    }
 
 }
 
@@ -555,27 +551,58 @@ function showDashboard(
 // LOGOUT
 // =====================================================
 
-logoutBtn.addEventListener(
-    "click",
-    async () => {
+if (logoutBtn) {
 
-        await signOut(auth);
+    logoutBtn.addEventListener(
+        "click",
+        async () => {
 
-        showLogin();
+            try {
 
-        emailInput.value = "";
+                await signOut(auth);
 
-        passwordInput.value = "";
+                if (emailInput)
+                    emailInput.value = "";
 
-    }
-);
+                if (passwordInput)
+                    passwordInput.value = "";
+
+                showLogin();
+
+                showLoginMessage(
+                    "",
+                    ""
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "LOGOUT ERROR:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+}
 
 
 // =====================================================
 // INITIALIZE DASHBOARD
 // =====================================================
 
+let dashboardInitialized = false;
+
+
 function initializeDashboard() {
+
+    if (dashboardInitialized) {
+        return;
+    }
+
+    dashboardInitialized = true;
 
     setupGroups();
 
@@ -593,6 +620,9 @@ function initializeDashboard() {
 // =====================================================
 
 function setupGroups() {
+
+    if (!groupFilter) return;
+
 
     groupFilter.innerHTML = `
 
@@ -640,10 +670,13 @@ function setupGroups() {
 
 
 // =====================================================
-// DATE
+// DATE FILTER
 // =====================================================
 
 function setupDate() {
+
+    if (!dateFilter) return;
+
 
     dateFilter.value =
         todayString();
@@ -668,6 +701,9 @@ function createSessionPanel() {
             "sessionPanel"
         )
     ) {
+
+        checkActiveSession();
+
         return;
     }
 
@@ -692,7 +728,6 @@ function createSessionPanel() {
         <div class="session-controls">
 
             <label>
-
                 Group
 
                 <select id="sessionGroup">
@@ -735,7 +770,6 @@ function createSessionPanel() {
 
 
             <label>
-
                 Duration
 
                 <select id="sessionDuration">
@@ -771,7 +805,8 @@ function createSessionPanel() {
 
             <button
                 id="openSessionBtn"
-                class="open-session-btn">
+                class="open-session-btn"
+                type="button">
 
                 Open Attendance
 
@@ -781,6 +816,7 @@ function createSessionPanel() {
             <button
                 id="closeSessionBtn"
                 class="close-session-btn"
+                type="button"
                 style="display:none;">
 
                 Close Attendance
@@ -807,7 +843,16 @@ function createSessionPanel() {
         );
 
 
-    // Put session panel at top
+    if (!container) {
+
+        console.error(
+            "dashboard-container not found"
+        );
+
+        return;
+    }
+
+
     container.insertBefore(
         panel,
         container.firstChild
@@ -815,7 +860,9 @@ function createSessionPanel() {
 
 
     document
-        .getElementById("openSessionBtn")
+        .getElementById(
+            "openSessionBtn"
+        )
         .addEventListener(
             "click",
             openSession
@@ -823,7 +870,9 @@ function createSessionPanel() {
 
 
     document
-        .getElementById("closeSessionBtn")
+        .getElementById(
+            "closeSessionBtn"
+        )
         .addEventListener(
             "click",
             closeSession
@@ -875,7 +924,12 @@ async function openSession() {
 
     try {
 
-        // Check active sessions
+        status.textContent =
+            "Opening attendance...";
+
+        status.className =
+            "session-status";
+
 
         const activeQuery =
             query(
@@ -967,39 +1021,11 @@ async function openSession() {
             "session-status session-active";
 
 
-        document
-            .getElementById(
-                "openSessionBtn"
-            )
-            .style.display =
-            "none";
+        setSessionControlsActive(
+            group,
+            duration
+        );
 
-
-        document
-            .getElementById(
-                "closeSessionBtn"
-            )
-            .style.display =
-            "inline-block";
-
-
-        document
-            .getElementById(
-                "sessionGroup"
-            )
-            .disabled =
-            true;
-
-
-        document
-            .getElementById(
-                "sessionDuration"
-            )
-            .disabled =
-            true;
-
-
-        // Automatically select group in records
 
         groupFilter.value =
             group;
@@ -1082,9 +1108,263 @@ async function checkActiveSession() {
             );
 
 
-        // Automatically close expired session
+        if (
+            now >= end
+        ) {
 
-        if (now >= end) {
+            await updateDoc(
+                doc(
+                    db,
+                    "sessions",
+                    sessionDoc.id
+                ),
+                {
+                    active: false
+                }
+            );
+
+
+            resetSession();
+
+            return;
+        }
+
+
+        const remaining =
+            Math.ceil(
+                (
+                    end.getTime() -
+                    now.getTime()
+                ) / 60000
+            );
+
+
+        const status =
+            document.getElementById(
+                "sessionStatus"
+            );
+
+
+        if (status) {
+
+            status.textContent =
+                `Group ${session.group} attendance is OPEN. ${remaining} minute(s) remaining.`;
+
+            status.className =
+                "session-status session-active";
+
+        }
+
+
+        setSessionControlsActive(
+            session.group,
+            session.duration
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "CHECK SESSION ERROR:",
+            error
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// SET SESSION CONTROLS
+// =====================================================
+
+function setSessionControlsActive(
+    group,
+    duration
+) {
+
+    const groupSelect =
+        document.getElementById(
+            "sessionGroup"
+        );
+
+    const durationSelect =
+        document.getElementById(
+            "sessionDuration"
+        );
+
+    const openBtn =
+        document.getElementById(
+            "openSessionBtn"
+        );
+
+    const closeBtn =
+        document.getElementById(
+            "closeSessionBtn"
+        );
+
+
+    if (groupSelect) {
+
+        groupSelect.value =
+            group;
+
+        groupSelect.disabled =
+            true;
+
+    }
+
+
+    if (durationSelect) {
+
+        durationSelect.value =
+            String(duration);
+
+        durationSelect.disabled =
+            true;
+
+    }
+
+
+    if (openBtn) {
+
+        openBtn.style.display =
+            "none";
+
+    }
+
+
+    if (closeBtn) {
+
+        closeBtn.style.display =
+            "inline-block";
+
+    }
+
+}
+
+
+// =====================================================
+// RESET SESSION
+// =====================================================
+
+function resetSession() {
+
+    const status =
+        document.getElementById(
+            "sessionStatus"
+        );
+
+
+    const groupSelect =
+        document.getElementById(
+            "sessionGroup"
+        );
+
+    const durationSelect =
+        document.getElementById(
+            "sessionDuration"
+        );
+
+    const openBtn =
+        document.getElementById(
+            "openSessionBtn"
+        );
+
+    const closeBtn =
+        document.getElementById(
+            "closeSessionBtn"
+        );
+
+
+    if (status) {
+
+        status.textContent =
+            "No active session.";
+
+        status.className =
+            "session-status";
+
+    }
+
+
+    if (groupSelect) {
+
+        groupSelect.disabled =
+            false;
+
+        groupSelect.value =
+            "";
+
+    }
+
+
+    if (durationSelect) {
+
+        durationSelect.disabled =
+            false;
+
+    }
+
+
+    if (openBtn) {
+
+        openBtn.style.display =
+            "inline-block";
+
+    }
+
+
+    if (closeBtn) {
+
+        closeBtn.style.display =
+            "none";
+
+    }
+
+}
+
+
+// =====================================================
+// CLOSE SESSION
+// =====================================================
+
+async function closeSession() {
+
+    try {
+
+        const activeQuery =
+            query(
+                collection(
+                    db,
+                    "sessions"
+                ),
+                where(
+                    "active",
+                    "==",
+                    true
+                )
+            );
+
+
+        const snapshot =
+            await getDocs(
+                activeQuery
+            );
+
+
+        if (snapshot.empty) {
+
+            resetSession();
+
+            return;
+        }
+
+
+        for (
+            const sessionDoc
+            of snapshot.docs
+        ) {
 
             await updateDoc(
                 doc(
@@ -1094,4 +1374,641 @@ async function checkActiveSession() {
                 ),
                 {
                     active: false,
-             
+                    closedAt:
+                        serverTimestamp(),
+                    closedBy:
+                        auth.currentUser.uid
+                }
+            );
+
+        }
+
+
+        resetSession();
+
+
+        await loadAttendance();
+
+
+    } catch (error) {
+
+        console.error(
+            "CLOSE SESSION ERROR:",
+            error
+        );
+
+
+        const status =
+            document.getElementById(
+                "sessionStatus"
+            );
+
+
+        if (status) {
+
+            status.textContent =
+                "Could not close attendance.";
+
+            status.className =
+                "session-status error";
+
+        }
+
+    }
+
+}
+
+
+// =====================================================
+// LOAD ATTENDANCE
+// =====================================================
+
+async function loadAttendance() {
+
+    if (!absentList) return;
+
+
+    absentList.innerHTML =
+        "<p>Loading...</p>";
+
+
+    try {
+
+        const selectedGroup =
+            groupFilter
+                ? groupFilter.value
+                : "";
+
+
+        const selectedDate =
+            dateFilter
+                ? dateFilter.value
+                : todayString();
+
+
+        const attendanceSnapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "attendance"
+                )
+            );
+
+
+        const records = [];
+
+
+        attendanceSnapshot.forEach(
+            attendanceDoc => {
+
+                const data =
+                    attendanceDoc.data();
+
+
+                if (
+                    selectedGroup &&
+                    String(data.group) !==
+                    String(selectedGroup)
+                ) {
+
+                    return;
+                }
+
+
+                if (
+                    selectedDate &&
+                    !isSameDate(
+                        data.submittedAt,
+                        selectedDate
+                    )
+                ) {
+
+                    return;
+                }
+
+
+                records.push({
+
+                    id:
+                        attendanceDoc.id,
+
+                    ...data
+
+                });
+
+            }
+        );
+
+
+        records.sort(
+            (a, b) => {
+
+                const dateA =
+                    getDateValue(
+                        a.submittedAt
+                    );
+
+                const dateB =
+                    getDateValue(
+                        b.submittedAt
+                    );
+
+                return dateB - dateA;
+
+            }
+        );
+
+
+        const total =
+            selectedGroup
+                ? groups[selectedGroup].length
+                : Object.values(groups)
+                    .reduce(
+                        (sum, group) =>
+                            sum + group.length,
+                        0
+                    );
+
+
+        totalStudents.textContent =
+            total;
+
+
+        absentCount.textContent =
+            records.length;
+
+
+        displayAttendance(
+            records
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "LOAD ATTENDANCE ERROR:",
+            error
+        );
+
+
+        absentList.innerHTML = `
+            <p class="error">
+                Could not load attendance.
+            </p>
+        `;
+
+    }
+
+}
+
+
+// =====================================================
+// DISPLAY ATTENDANCE
+// =====================================================
+
+function displayAttendance(
+    records
+) {
+
+    if (!records.length) {
+
+        absentList.innerHTML = `
+            <div class="empty-message">
+                No absent students found.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    absentList.innerHTML = "";
+
+
+    records.forEach(
+        record => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "attendance-item";
+
+
+            const time =
+                formatDateTime(
+                    record.submittedAt
+                );
+
+
+            item.innerHTML = `
+
+                <div>
+
+                    <strong>
+                        ${escapeHtml(
+                            record.studentName ||
+                            "Unknown Student"
+                        )}
+                    </strong>
+
+                    <div>
+                        Group ${escapeHtml(
+                            String(
+                                record.group || ""
+                            )
+                        )}
+                    </div>
+
+                    <small>
+                        ${time}
+                    </small>
+
+                </div>
+
+
+                <button
+                    class="delete-attendance-btn"
+                    type="button">
+
+                    Delete
+
+                </button>
+
+            `;
+
+
+            const deleteBtn =
+                item.querySelector(
+                    ".delete-attendance-btn"
+                );
+
+
+            deleteBtn.addEventListener(
+                "click",
+                () => {
+
+                    deleteAttendance(
+                        record.id
+                    );
+
+                }
+            );
+
+
+            absentList.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// DELETE ATTENDANCE
+// =====================================================
+
+async function deleteAttendance(
+    attendanceId
+) {
+
+    if (!attendanceId) return;
+
+
+    const confirmed =
+        confirm(
+            "Delete this absence record?"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        await deleteDoc(
+            doc(
+                db,
+                "attendance",
+                attendanceId
+            )
+        );
+
+
+        await loadAttendance();
+
+
+    } catch (error) {
+
+        console.error(
+            "DELETE ATTENDANCE ERROR:",
+            error
+        );
+
+
+        alert(
+            "Could not delete the record."
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// DATE HELPERS
+// =====================================================
+
+function todayString() {
+
+    const now =
+        new Date();
+
+
+    const year =
+        now.getFullYear();
+
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return (
+        year +
+        "-" +
+        month +
+        "-" +
+        day
+    );
+
+}
+
+
+// =====================================================
+// CHECK SAME DATE
+// =====================================================
+
+function isSameDate(
+    timestamp,
+    selectedDate
+) {
+
+    if (!timestamp) {
+        return false;
+    }
+
+
+    const date =
+        getDateObject(
+            timestamp
+        );
+
+
+    if (!date) {
+        return false;
+    }
+
+
+    const year =
+        date.getFullYear();
+
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const dateString =
+        `${year}-${month}-${day}`;
+
+
+    return (
+        dateString ===
+        selectedDate
+    );
+
+}
+
+
+// =====================================================
+// DATE OBJECT
+// =====================================================
+
+function getDateObject(
+    value
+) {
+
+    if (!value) {
+        return null;
+    }
+
+
+    if (
+        typeof value.toDate ===
+        "function"
+    ) {
+
+        return value.toDate();
+
+    }
+
+
+    if (
+        value instanceof Date
+    ) {
+
+        return value;
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return null;
+
+    }
+
+
+    return date;
+
+}
+
+
+// =====================================================
+// DATE VALUE
+// =====================================================
+
+function getDateValue(
+    value
+) {
+
+    const date =
+        getDateObject(
+            value
+        );
+
+
+    return date
+        ? date.getTime()
+        : 0;
+
+}
+
+
+// =====================================================
+// FORMAT TIME
+// =====================================================
+
+function formatTime(
+    date
+) {
+
+    return date.toLocaleTimeString(
+        [],
+        {
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+// =====================================================
+// FORMAT DATE + TIME
+// =====================================================
+
+function formatDateTime(
+    value
+) {
+
+    const date =
+        getDateObject(
+            value
+        );
+
+
+    if (!date) {
+
+        return "Time unavailable";
+
+    }
+
+
+    return date.toLocaleString(
+        [],
+        {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+// =====================================================
+// ESCAPE HTML
+// =====================================================
+
+function escapeHtml(
+    value
+) {
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+// =====================================================
+// AUTOMATIC SESSION CHECK
+// =====================================================
+
+setInterval(
+    async () => {
+
+        if (
+            auth.currentUser
+        ) {
+
+            await checkActiveSession();
+
+            await loadAttendance();
+
+        }
+
+    },
+    30000
+);
+
+
+// =====================================================
+// INITIAL STATE
+// =====================================================
+
+showLogin();
+    
