@@ -95,6 +95,28 @@ const groups = {
         "Avanthika"
 
     ],
+  
+   "Group 8": [
+    "PAUL SHINE",
+    "DAN B SAM",
+    "RAJKRISHNA B",
+    "JUSTIN SHAJI",
+    "MURSHIDA THASNEEM P",
+    "FEBINA ROJIN",
+    "GODWIN BINU MATHEW",
+    "ANANNYA",
+    "HIBA",
+    "NITHA FATHIMA",
+    "SHIFANA SHERIN",
+    "ALFIYA",
+    "LAKSHMISHREE",
+    "RIYA SHAJI",
+    "STEFY B",
+    "SREEMATHI G",
+    "ANN MARIA",
+    "JAREENA",
+    "EVA SAYONA"
+],
 
 
     "Group 9": [
