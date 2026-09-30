@@ -132,6 +132,28 @@ const groups = {
         "Sona",
         "Avanthika"
     ],
+  
+    "Group 8": [
+    "PAUL SHINE",
+    "DAN B SAM",
+    "RAJKRISHNA B",
+    "JUSTIN SHAJI",
+    "MURSHIDA THASNEEM P",
+    "FEBINA ROJIN",
+    "GODWIN BINU MATHEW",
+    "ANANNYA",
+    "HIBA",
+    "NITHA FATHIMA",
+    "SHIFANA SHERIN",
+    "ALFIYA",
+    "LAKSHMISHREE",
+    "RIYA SHAJI",
+    "STEFY B",
+    "SREEMATHI G",
+    "ANN MARIA",
+    "JAREENA",
+    "EVA SAYONA"
+],
 
     "Group 9": [
         "Ajlan Mahmood",
@@ -593,7 +615,9 @@ function setupGroups() {
         <option value="Group 7">
             Group 7
         </option>
-
+        <option value="Group 8">
+            Group 8
+        </option>
         <option value="Group 9">
             Group 9
         </option>
@@ -692,9 +716,11 @@ function createSessionPanel() {
                     </option>
 
                     <option value="Group 7">
-                        Group 7
-                    </option>
-
+            Group 7
+        </option>
+           <option value="Group 8">
+            Group 8
+        </option>
                     <option value="Group 9">
                         Group 9
                     </option>
