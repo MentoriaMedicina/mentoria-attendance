@@ -31,7 +31,7 @@ import {
 const firebaseConfig = {
 
     apiKey:
-        "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPQ",
+        "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPXQ",
 
     authDomain:
         "mentoria-medicina-attend-7d5ca.firebaseapp.com",
