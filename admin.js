@@ -35,14 +35,16 @@ import {
 // =====================================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPXQ",
-  authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
-  databaseURL: "https://mentoria-medicina-attend-7d5ca-default-rtdb.firebaseio.com",
-  projectId: "mentoria-medicina-attend-7d5ca",
-  storageBucket: "mentoria-medicina-attend-7d5ca.firebasestorage.app",
-  messagingSenderId: "238479536134",
-  appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387",
-  measurementId: "G-WEVCZ0JG2K"
+    apiKey: "AIzaSyBPag4SLqUmdfAws0WFLV7FWp3X8_eLPQ",
+    authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
+    databaseURL:
+        "https://mentoria-medicina-attend-7d5ca-default-rtdb.firebaseio.com",
+    projectId: "mentoria-medicina-attend-7d5ca",
+    storageBucket:
+        "mentoria-medicina-attend-7d5ca.firebasestorage.app",
+    messagingSenderId: "238479536134",
+    appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387",
+    measurementId: "G-WEVCZ0JG2K"
 };
 
 
@@ -263,126 +265,176 @@ const groups = {
 
 
 // =====================================================
+// NORMALIZE STUDENT NAME
+// =====================================================
+
+function normalizeName(name) {
+
+    return String(name || "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+
+}
+
+
+// =====================================================
+// GET TIMESTAMP VALUE
+// =====================================================
+
+function getTimestampValue(timestamp) {
+
+    if (!timestamp) {
+        return 0;
+    }
+
+    if (
+        typeof timestamp.toMillis === "function"
+    ) {
+        return timestamp.toMillis();
+    }
+
+    if (
+        typeof timestamp.seconds === "number"
+    ) {
+        return timestamp.seconds * 1000;
+    }
+
+    if (
+        timestamp instanceof Date
+    ) {
+        return timestamp.getTime();
+    }
+
+    return 0;
+}
+
+
+// =====================================================
 // LOGIN
 // =====================================================
 
-loginBtn.addEventListener("click", async () => {
+loginBtn.addEventListener(
+    "click",
+    async () => {
 
-    const email =
-        emailInput.value.trim();
+        const email =
+            emailInput.value.trim();
 
-    const password =
-        passwordInput.value;
+        const password =
+            passwordInput.value;
 
-    if (!email || !password) {
+        if (!email || !password) {
+
+            loginMessage.textContent =
+                "Please enter email and password.";
+
+            loginMessage.style.color =
+                "red";
+
+            return;
+        }
+
+        loginBtn.disabled = true;
+
+        loginBtn.textContent =
+            "Logging in...";
 
         loginMessage.textContent =
-            "Please enter email and password.";
+            "Checking account...";
 
         loginMessage.style.color =
-            "red";
+            "#1565c0";
 
-        return;
-    }
+        try {
 
-    loginBtn.disabled = true;
+            const userCredential =
+                await signInWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
+                );
 
-    loginBtn.textContent =
-        "Logging in...";
+            const user =
+                userCredential.user;
 
-    loginMessage.textContent =
-        "Checking account...";
-
-    loginMessage.style.color =
-        "#1565c0";
-
-    try {
-
-        const userCredential =
-            await signInWithEmailAndPassword(
-                auth,
-                email,
-                password
-            );
-
-        const user =
-            userCredential.user;
-
-        console.log(
-            "Authentication successful:",
-            user.uid
-        );
-
-        const adminRef =
-            doc(
-                db,
-                "admins",
+            console.log(
+                "Authentication successful:",
                 user.uid
             );
 
-        const adminSnapshot =
-            await getDoc(adminRef);
+            const adminRef =
+                doc(
+                    db,
+                    "admins",
+                    user.uid
+                );
 
-        if (!adminSnapshot.exists()) {
+            const adminSnapshot =
+                await getDoc(adminRef);
 
-            await signOut(auth);
+            if (!adminSnapshot.exists()) {
+
+                await signOut(auth);
+
+                loginMessage.textContent =
+                    "Login successful, but this account has no admin permission.";
+
+                loginMessage.style.color =
+                    "red";
+
+                return;
+            }
+
+            const adminData =
+                adminSnapshot.data();
+
+            if (
+                adminData.role !== "admin"
+            ) {
+
+                await signOut(auth);
+
+                loginMessage.textContent =
+                    "This account is not an admin.";
+
+                loginMessage.style.color =
+                    "red";
+
+                return;
+            }
+
+            console.log(
+                "Admin permission verified"
+            );
 
             loginMessage.textContent =
-                "Login successful, but this account has no admin permission.";
+                "Login successful.";
+
+            loginMessage.style.color =
+                "green";
+
+        } catch (error) {
+
+            console.error(
+                "LOGIN ERROR:",
+                error
+            );
+
+            loginMessage.textContent =
+                getErrorMessage(error);
 
             loginMessage.style.color =
                 "red";
-
-            return;
         }
 
-        const adminData =
-            adminSnapshot.data();
+        loginBtn.disabled = false;
 
-        if (adminData.role !== "admin") {
-
-            await signOut(auth);
-
-            loginMessage.textContent =
-                "This account is not an admin.";
-
-            loginMessage.style.color =
-                "red";
-
-            return;
-        }
-
-        console.log(
-            "Admin permission verified"
-        );
-
-        loginMessage.textContent =
-            "Login successful.";
-
-        loginMessage.style.color =
-            "green";
-
-    } catch (error) {
-
-        console.error(
-            "LOGIN ERROR:",
-            error
-        );
-
-        loginMessage.textContent =
-            getErrorMessage(error);
-
-        loginMessage.style.color =
-            "red";
+        loginBtn.textContent =
+            "Login";
 
     }
-
-    loginBtn.disabled = false;
-
-    loginBtn.textContent =
-        "Login";
-
-});
+);
 
 
 // =====================================================
@@ -435,7 +487,9 @@ onAuthStateChanged(
             const adminData =
                 adminSnapshot.data();
 
-            if (adminData.role !== "admin") {
+            if (
+                adminData.role !== "admin"
+            ) {
 
                 await signOut(auth);
 
@@ -488,7 +542,6 @@ function showLogin() {
 
     adminDashboard.style.display =
         "none";
-
 }
 
 
@@ -510,7 +563,6 @@ function showDashboard(
     adminEmail.textContent =
         adminData.name ||
         user.email;
-
 }
 
 
@@ -597,7 +649,6 @@ function setupGroups() {
         "change",
         loadAttendance
     );
-
 }
 
 
@@ -614,7 +665,6 @@ function setupDate() {
         "change",
         loadAttendance
     );
-
 }
 
 
@@ -650,7 +700,6 @@ function createSessionPanel() {
         <div class="session-controls">
 
             <label>
-
                 Group
 
                 <select id="sessionGroup">
@@ -759,24 +808,33 @@ function createSessionPanel() {
             ".dashboard-container"
         );
 
-    if (container) {
+    if (!container) {
 
-        container.insertBefore(
-            panel,
-            container.firstChild
+        console.error(
+            "dashboard-container not found"
         );
 
+        return;
     }
 
+    container.insertBefore(
+        panel,
+        container.firstChild
+    );
+
     document
-        .getElementById("openSessionBtn")
+        .getElementById(
+            "openSessionBtn"
+        )
         .addEventListener(
             "click",
             openSession
         );
 
     document
-        .getElementById("closeSessionBtn")
+        .getElementById(
+            "closeSessionBtn"
+        )
         .addEventListener(
             "click",
             closeSession
@@ -933,7 +991,7 @@ async function openSession() {
             true;
 
         groupFilter.value =
-            String(group);
+            group;
 
         await loadAttendance();
 
@@ -950,7 +1008,6 @@ async function openSession() {
 
         status.className =
             "session-status error";
-
     }
 
 }
@@ -1003,7 +1060,9 @@ async function checkActiveSession() {
                 session.endTime
             );
 
-        if (now >= end) {
+        if (
+            now >= end
+        ) {
 
             await updateDoc(
                 doc(
@@ -1013,6 +1072,7 @@ async function checkActiveSession() {
                 ),
                 {
                     active: false,
+
                     closedAt:
                         serverTimestamp()
                 }
@@ -1068,6 +1128,9 @@ async function checkActiveSession() {
             )
             .style.display =
             "inline-block";
+
+        groupFilter.value =
+            String(session.group);
 
     } catch (error) {
 
@@ -1170,7 +1233,6 @@ function resetSession() {
 
         status.className =
             "session-status session-closed";
-
     }
 
     const openBtn =
@@ -1221,6 +1283,10 @@ function resetSession() {
 // =====================================================
 // LOAD ATTENDANCE
 // =====================================================
+// IMPORTANT FIX:
+// Group filtering is done using the student roster.
+// It does NOT depend only on data.group.
+// =====================================================
 
 async function loadAttendance() {
 
@@ -1238,8 +1304,21 @@ async function loadAttendance() {
             dateFilter.value;
 
         console.log(
-            "Selected group:",
+            "================================="
+        );
+
+        console.log(
+            "Selected Group:",
             selectedGroup
+        );
+
+        console.log(
+            "Selected Date:",
+            selectedDate
+        );
+
+        console.log(
+            "================================="
         );
 
         const snapshot =
@@ -1258,54 +1337,138 @@ async function loadAttendance() {
                 const data =
                     docSnapshot.data();
 
-                // =========================================
-                // FIXED GROUP FILTER
-                // =========================================
+                const studentName =
+                    String(
+                        data.studentName || ""
+                    ).trim();
 
-                const recordGroup =
+                const storedGroup =
                     String(
                         data.group ?? ""
                     ).trim();
 
-                if (
-                    selectedGroup &&
-                    recordGroup !== selectedGroup
-                ) {
+                console.log(
+                    "Attendance:",
+                    studentName,
+                    "| Firestore group:",
+                    storedGroup
+                );
 
-                    console.log(
-                        "Skipping record:",
-                        data.studentName,
-                        "record group:",
-                        recordGroup,
-                        "selected group:",
-                        selectedGroup
-                    );
 
-                    return;
-                }
+                // =====================================
+                // GROUP FILTER
+                // =====================================
 
-                // =========================================
-                // DATE FILTER
-                // =========================================
+                if (selectedGroup) {
 
-                if (
-                    data.submittedAt &&
-                    data.submittedAt.toDate
-                ) {
+                    const selectedStudents =
+                        groups[selectedGroup] || [];
 
-                    const date =
-                        dateString(
-                            data.submittedAt.toDate()
+                    const normalizedStudentName =
+                        normalizeName(
+                            studentName
                         );
 
+                    const belongsToGroup =
+                        selectedStudents.some(
+                            (name) => {
+
+                                return (
+                                    normalizeName(name) ===
+                                    normalizedStudentName
+                                );
+
+                            }
+                        );
+
+                    if (!belongsToGroup) {
+
+                        console.log(
+                            "Removed by group filter:",
+                            studentName
+                        );
+
+                        return;
+                    }
+
+                }
+
+
+                // =====================================
+                // DATE FILTER
+                // =====================================
+
+                if (
+                    data.submittedAt
+                ) {
+
+                    let attendanceDate =
+                        null;
+
+
                     if (
-                        date !== selectedDate
+                        typeof data.submittedAt.toDate ===
+                        "function"
+                    ) {
+
+                        attendanceDate =
+                            dateString(
+                                data.submittedAt.toDate()
+                            );
+
+                    }
+
+                    else if (
+                        typeof data.submittedAt.toMillis ===
+                        "function"
+                    ) {
+
+                        attendanceDate =
+                            dateString(
+                                new Date(
+                                    data.submittedAt.toMillis()
+                                )
+                            );
+
+                    }
+
+                    else if (
+                        typeof data.submittedAt.seconds ===
+                        "number"
+                    ) {
+
+                        attendanceDate =
+                            dateString(
+                                new Date(
+                                    data.submittedAt.seconds *
+                                    1000
+                                )
+                            );
+
+                    }
+
+                    else if (
+                        data.submittedAt instanceof Date
+                    ) {
+
+                        attendanceDate =
+                            dateString(
+                                data.submittedAt
+                            );
+
+                    }
+
+
+                    if (
+                        attendanceDate &&
+                        attendanceDate !== selectedDate
                     ) {
 
                         return;
                     }
 
                 }
+
 
                 records.push({
 
@@ -1319,9 +1482,10 @@ async function loadAttendance() {
             }
         );
 
-        // =========================================
+
+        // =====================================
         // SORT NEWEST FIRST
-        // =========================================
+        // =====================================
 
         records.sort(
             (a, b) => {
@@ -1336,15 +1500,32 @@ async function loadAttendance() {
                         b.submittedAt
                     );
 
-                return bTime - aTime;
+                return (
+                    bTime - aTime
+                );
 
             }
         );
 
+
         console.log(
-            "Filtered attendance records:",
+            "================================="
+        );
+
+        console.log(
+            "FINAL FILTERED RECORDS:",
             records
         );
+
+        console.log(
+            "Total records:",
+            records.length
+        );
+
+        console.log(
+            "================================="
+        );
+
 
         displayAttendance(
             records,
@@ -1362,7 +1543,7 @@ async function loadAttendance() {
 
             <p style="color:red;">
 
-                Error loading attendance:<br>
+                Error loading attendance:<br><br>
 
                 ${escapeHtml(
                     error.message
@@ -1388,13 +1569,16 @@ function displayAttendance(
 
     let total = 0;
 
+
     if (selectedGroup) {
 
         total =
             groups[selectedGroup]?.length ||
             0;
 
-    } else {
+    }
+
+    else {
 
         total =
             Object.values(groups)
@@ -1406,13 +1590,17 @@ function displayAttendance(
 
     }
 
+
     totalStudents.textContent =
         total;
 
     absentCount.textContent =
         records.length;
 
-    if (records.length === 0) {
+
+    if (
+        records.length === 0
+    ) {
 
         absentList.innerHTML = `
 
@@ -1425,7 +1613,10 @@ function displayAttendance(
         return;
     }
 
-    absentList.innerHTML = "";
+
+    absentList.innerHTML =
+        "";
+
 
     records.forEach(
         (record, index) => {
@@ -1438,12 +1629,15 @@ function displayAttendance(
             item.className =
                 "attendance-item";
 
+
             let time =
                 "";
 
+
             if (
                 record.submittedAt &&
-                record.submittedAt.toDate
+                typeof record.submittedAt.toDate ===
+                "function"
             ) {
 
                 time =
@@ -1453,22 +1647,59 @@ function displayAttendance(
 
             }
 
+            else if (
+                record.submittedAt &&
+                typeof record.submittedAt.toMillis ===
+                "function"
+            ) {
+
+                time =
+                    formatTime(
+                        new Date(
+                            record.submittedAt.toMillis()
+                        )
+                    );
+
+            }
+
+            else if (
+                record.submittedAt &&
+                typeof record.submittedAt.seconds ===
+                "number"
+            ) {
+
+                time =
+                    formatTime(
+                        new Date(
+                            record.submittedAt.seconds *
+                            1000
+                        )
+                    );
+
+            }
+
+
             item.innerHTML = `
 
                 <strong>
+
                     ${index + 1}.
                     ${escapeHtml(
                         record.studentName ||
                         "Unknown"
                     )}
+
                 </strong>
 
-                <br>
+                <br><br>
 
                 Group:
                 ${escapeHtml(
                     String(
                         record.group ??
+                        findStudentGroup(
+                            record.studentName
+                        ) ||
                         "-"
                     )
                 )}
@@ -1496,17 +1727,22 @@ function displayAttendance(
 
             `;
 
+
             item
                 .querySelector(
                     ".delete-attendance"
                 )
                 .addEventListener(
                     "click",
-                    () =>
+                    () => {
+
                         deleteAttendance(
                             record.id
-                        )
+                        );
+
+                    }
                 );
+
 
             absentList.appendChild(
                 item
@@ -1514,6 +1750,44 @@ function displayAttendance(
 
         }
     );
+
+}
+
+
+// =====================================================
+// FIND STUDENT GROUP
+// =====================================================
+
+function findStudentGroup(
+    studentName
+) {
+
+    const normalized =
+        normalizeName(
+            studentName
+        );
+
+    for (
+        const [groupNumber, students]
+        of Object.entries(groups)
+    ) {
+
+        const found =
+            students.some(
+                (name) =>
+                    normalizeName(name) ===
+                    normalized
+            );
+
+        if (found) {
+
+            return groupNumber;
+
+        }
+
+    }
+
+    return null;
 
 }
 
@@ -1532,7 +1806,6 @@ async function deleteAttendance(
         );
 
     if (!confirmDelete) {
-
         return;
     }
 
@@ -1561,50 +1834,6 @@ async function deleteAttendance(
         );
 
     }
-
-}
-
-
-// =====================================================
-// FIRESTORE TIMESTAMP HELPER
-// =====================================================
-
-function getTimestampValue(
-    timestamp
-) {
-
-    if (!timestamp) {
-
-        return 0;
-    }
-
-    if (
-        typeof timestamp.toMillis ===
-        "function"
-    ) {
-
-        return timestamp.toMillis();
-
-    }
-
-    if (
-        typeof timestamp.seconds ===
-        "number"
-    ) {
-
-        return timestamp.seconds * 1000;
-
-    }
-
-    if (
-        timestamp instanceof Date
-    ) {
-
-        return timestamp.getTime();
-
-    }
-
-    return 0;
 
 }
 
@@ -1642,7 +1871,9 @@ function todayString() {
 }
 
 
-function dateString(date) {
+function dateString(
+    date
+) {
 
     const year =
         date.getFullYear();
@@ -1672,7 +1903,9 @@ function dateString(date) {
 // TIME
 // =====================================================
 
-function formatTime(date) {
+function formatTime(
+    date
+) {
 
     return date.toLocaleTimeString(
         [],
@@ -1690,7 +1923,9 @@ function formatTime(date) {
 // SECURITY
 // =====================================================
 
-function escapeHtml(text) {
+function escapeHtml(
+    text
+) {
 
     const div =
         document.createElement(
@@ -1698,7 +1933,7 @@ function escapeHtml(text) {
         );
 
     div.textContent =
-        String(text);
+        String(text ?? "");
 
     return div.innerHTML;
 
@@ -1709,14 +1944,18 @@ function escapeHtml(text) {
 // FIREBASE ERROR
 // =====================================================
 
-function getErrorMessage(error) {
+function getErrorMessage(
+    error
+) {
 
     console.error(
         "Firebase error:",
         error
     );
 
-    switch (error.code) {
+    switch (
+        error.code
+    ) {
 
         case "auth/invalid-credential":
 
@@ -1753,6 +1992,14 @@ function getErrorMessage(error) {
         case "permission-denied":
 
             return "Firestore permission denied. Check Firestore Rules.";
+
+        case "failed-precondition":
+
+            return "Firestore operation failed. Check Firebase configuration.";
+
+        case "unavailable":
+
+            return "Firebase is temporarily unavailable. Check your internet.";
 
         default:
 
