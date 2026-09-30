@@ -110,7 +110,7 @@ const absentCount =
 
 const groups = {
 
-    "7": [
+    "Group 7": [
         "Jayaram",
         "Nikhil",
         "Afsal",
@@ -133,7 +133,7 @@ const groups = {
         "Avanthika"
     ],
 
-    "9": [
+    "Group 9": [
         "Ajlan Mahmood",
         "Aliya naushad",
         "Almaz russel",
@@ -155,7 +155,7 @@ const groups = {
         "Aishwarya"
     ],
 
-    "10": [
+    "Group 10": [
         "P Meenakshy Nair",
         "Gloria v s",
         "Sandra. S. R",
@@ -178,7 +178,7 @@ const groups = {
         "Jelshian VA"
     ],
 
-    "11": [
+    "Group 11": [
         "Anu suresh Aryananda",
         "Archana shaji Akshaya",
         "Biju Anugraha",
@@ -201,7 +201,7 @@ const groups = {
         "Shaji Jagath"
     ],
 
-    "12": [
+    "Group 12": [
         "Musthaid",
         "anaswara",
         "varsha",
@@ -224,7 +224,7 @@ const groups = {
         "Reby"
     ],
 
-    "13": [
+    "Group 13": [
         "Niranjan",
         "Athul Rajendran",
         "Abhiram Darshan H",
@@ -247,7 +247,7 @@ const groups = {
         "Gulfisha"
     ],
 
-    "15": [
+    "Group 15": [
         "Joshua jimmy",
         "Saldan k.s",
         "Abhinandh L.S",
@@ -590,31 +590,31 @@ function setupGroups() {
             All Groups
         </option>
 
-        <option value="7">
+        <option value="Group 7">
             Group 7
         </option>
 
-        <option value="9">
+        <option value="Group 9">
             Group 9
         </option>
 
-        <option value="10">
+        <option value="Group 10">
             Group 10
         </option>
 
-        <option value="11">
+        <option value="Group 11">
             Group 11
         </option>
 
-        <option value="12">
+        <option value="Group 12">
             Group 12
         </option>
 
-        <option value="13">
+        <option value="Group 13">
             Group 13
         </option>
 
-        <option value="15">
+        <option value="Group 15">
             Group 15
         </option>
 
@@ -691,31 +691,31 @@ function createSessionPanel() {
                         Select Group
                     </option>
 
-                    <option value="7">
+                    <option value="Group 7">
                         Group 7
                     </option>
 
-                    <option value="9">
+                    <option value="Group 9">
                         Group 9
                     </option>
 
-                    <option value="10">
+                    <option value="Group 10">
                         Group 10
                     </option>
 
-                    <option value="11">
+                    <option value="Group 11">
                         Group 11
                     </option>
 
-                    <option value="12">
+                    <option value="Group 12">
                         Group 12
                     </option>
 
-                    <option value="13">
+                    <option value="Group 13">
                         Group 13
                     </option>
 
-                    <option value="15">
+                    <option value="Group 15">
                         Group 15
                     </option>
 
@@ -726,7 +726,7 @@ function createSessionPanel() {
 
             <label>
 
-                Duration
+                Durationf
 
                 <select id="sessionDuration">
 
