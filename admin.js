@@ -35,14 +35,14 @@ import {
 // =====================================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBPag4SLUqmdfAws0WFLV7FWp3X8_eLPXQ",
-  authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
-  databaseURL: "https://mentoria-medicina-attend-7d5ca-default-rtdb.firebaseio.com",
-  projectId: "mentoria-medicina-attend-7d5ca",
-  storageBucket: "mentoria-medicina-attend-7d5ca.firebasestorage.app",
-  messagingSenderId: "238479536134",
-  appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387",
-  measurementId: "G-WEVCZ0JG2K"
+    apiKey: "AIzaSyBPag4SLqUmdfAws0WFLV7FWp3X8_eLPQ",
+    authDomain: "mentoria-medicina-attend-7d5ca.firebaseapp.com",
+    databaseURL: "https://mentoria-medicina-attend-7d5ca-default-rtdb.firebaseio.com",
+    projectId: "mentoria-medicina-attend-7d5ca",
+    storageBucket: "mentoria-medicina-attend-7d5ca.firebasestorage.app",
+    messagingSenderId: "238479536134",
+    appId: "1:238479536134:web:3ff9a57dc1cb70dc8c9387",
+    measurementId: "G-WEVCZ0JG2K"
 };
 
 
@@ -285,19 +285,16 @@ loginBtn.addEventListener("click", async () => {
         return;
     }
 
-
     loginBtn.disabled = true;
 
     loginBtn.textContent =
         "Logging in...";
-
 
     loginMessage.textContent =
         "Checking account...";
 
     loginMessage.style.color =
         "#1565c0";
-
 
     try {
 
@@ -308,18 +305,13 @@ loginBtn.addEventListener("click", async () => {
                 password
             );
 
-
         const user =
             userCredential.user;
-
 
         console.log(
             "Authentication successful:",
             user.uid
         );
-
-
-        // Check admins collection
 
         const adminRef =
             doc(
@@ -328,10 +320,8 @@ loginBtn.addEventListener("click", async () => {
                 user.uid
             );
 
-
         const adminSnapshot =
             await getDoc(adminRef);
-
 
         if (!adminSnapshot.exists()) {
 
@@ -346,10 +336,8 @@ loginBtn.addEventListener("click", async () => {
             return;
         }
 
-
         const adminData =
             adminSnapshot.data();
-
 
         if (adminData.role !== "admin") {
 
@@ -364,18 +352,15 @@ loginBtn.addEventListener("click", async () => {
             return;
         }
 
-
         console.log(
             "Admin permission verified"
         );
-
 
         loginMessage.textContent =
             "Login successful.";
 
         loginMessage.style.color =
             "green";
-
 
     } catch (error) {
 
@@ -384,7 +369,6 @@ loginBtn.addEventListener("click", async () => {
             error
         );
 
-
         loginMessage.textContent =
             getErrorMessage(error);
 
@@ -392,7 +376,6 @@ loginBtn.addEventListener("click", async () => {
             "red";
 
     }
-
 
     loginBtn.disabled = false;
 
@@ -417,12 +400,10 @@ onAuthStateChanged(
             return;
         }
 
-
         console.log(
             "User already logged in:",
             user.email
         );
-
 
         try {
 
@@ -433,10 +414,8 @@ onAuthStateChanged(
                     user.uid
                 );
 
-
             const adminSnapshot =
                 await getDoc(adminRef);
-
 
             if (!adminSnapshot.exists()) {
 
@@ -453,10 +432,8 @@ onAuthStateChanged(
                 return;
             }
 
-
             const adminData =
                 adminSnapshot.data();
-
 
             if (adminData.role !== "admin") {
 
@@ -473,15 +450,12 @@ onAuthStateChanged(
                 return;
             }
 
-
             showDashboard(
                 user,
                 adminData
             );
 
-
             initializeDashboard();
-
 
         } catch (error) {
 
@@ -532,7 +506,6 @@ function showDashboard(
 
     adminDashboard.style.display =
         "block";
-
 
     adminEmail.textContent =
         adminData.name ||
@@ -620,7 +593,6 @@ function setupGroups() {
 
     `;
 
-
     groupFilter.addEventListener(
         "change",
         loadAttendance
@@ -637,7 +609,6 @@ function setupDate() {
 
     dateFilter.value =
         todayString();
-
 
     dateFilter.addEventListener(
         "change",
@@ -661,17 +632,14 @@ function createSessionPanel() {
         return;
     }
 
-
     const panel =
         document.createElement("div");
-
 
     panel.id =
         "sessionPanel";
 
     panel.className =
         "admin-card";
-
 
     panel.innerHTML = `
 
@@ -723,7 +691,6 @@ function createSessionPanel() {
 
             </label>
 
-
             <label>
 
                 Duration
@@ -758,7 +725,6 @@ function createSessionPanel() {
 
             </label>
 
-
             <button
                 id="openSessionBtn"
                 class="open-session-btn">
@@ -766,7 +732,6 @@ function createSessionPanel() {
                 Open Attendance
 
             </button>
-
 
             <button
                 id="closeSessionBtn"
@@ -779,7 +744,6 @@ function createSessionPanel() {
 
         </div>
 
-
         <div
             id="sessionStatus"
             class="session-status">
@@ -790,19 +754,19 @@ function createSessionPanel() {
 
     `;
 
-
     const container =
         document.querySelector(
             ".dashboard-container"
         );
 
+    if (container) {
 
-    // Put session panel at top
-    container.insertBefore(
-        panel,
-        container.firstChild
-    );
+        container.insertBefore(
+            panel,
+            container.firstChild
+        );
 
+    }
 
     document
         .getElementById("openSessionBtn")
@@ -811,14 +775,12 @@ function createSessionPanel() {
             openSession
         );
 
-
     document
         .getElementById("closeSessionBtn")
         .addEventListener(
             "click",
             closeSession
         );
-
 
     checkActiveSession();
 
@@ -836,7 +798,6 @@ async function openSession() {
             "sessionGroup"
         ).value;
 
-
     const duration =
         Number(
             document.getElementById(
@@ -844,12 +805,10 @@ async function openSession() {
             ).value
         );
 
-
     const status =
         document.getElementById(
             "sessionStatus"
         );
-
 
     if (!group) {
 
@@ -862,10 +821,7 @@ async function openSession() {
         return;
     }
 
-
     try {
-
-        // Check active sessions
 
         const activeQuery =
             query(
@@ -880,12 +836,10 @@ async function openSession() {
                 )
             );
 
-
         const activeSnapshot =
             await getDocs(
                 activeQuery
             );
-
 
         if (!activeSnapshot.empty) {
 
@@ -898,10 +852,8 @@ async function openSession() {
             return;
         }
 
-
         const start =
             new Date();
-
 
         const end =
             new Date(
@@ -909,10 +861,9 @@ async function openSession() {
                 duration * 60 * 1000
             );
 
-
         const sessionData = {
 
-            group: group,
+            group: String(group),
 
             active: true,
 
@@ -933,7 +884,6 @@ async function openSession() {
 
         };
 
-
         const sessionRef =
             await addDoc(
                 collection(
@@ -943,19 +893,16 @@ async function openSession() {
                 sessionData
             );
 
-
         console.log(
             "Session created:",
             sessionRef.id
         );
-
 
         status.textContent =
             `Group ${group} attendance is OPEN until ${formatTime(end)}.`;
 
         status.className =
             "session-status session-active";
-
 
         document
             .getElementById(
@@ -964,14 +911,12 @@ async function openSession() {
             .style.display =
             "none";
 
-
         document
             .getElementById(
                 "closeSessionBtn"
             )
             .style.display =
             "inline-block";
-
 
         document
             .getElementById(
@@ -980,7 +925,6 @@ async function openSession() {
             .disabled =
             true;
 
-
         document
             .getElementById(
                 "sessionDuration"
@@ -988,15 +932,10 @@ async function openSession() {
             .disabled =
             true;
 
-
-        // Automatically select group in records
-
         groupFilter.value =
-            group;
-
+            String(group);
 
         await loadAttendance();
-
 
     } catch (error) {
 
@@ -1004,7 +943,6 @@ async function openSession() {
             "OPEN SESSION ERROR:",
             error
         );
-
 
         status.textContent =
             "Could not open session: " +
@@ -1039,12 +977,10 @@ async function checkActiveSession() {
                 )
             );
 
-
         const snapshot =
             await getDocs(
                 activeQuery
             );
-
 
         if (snapshot.empty) {
 
@@ -1053,26 +989,19 @@ async function checkActiveSession() {
             return;
         }
 
-
         const sessionDoc =
             snapshot.docs[0];
-
 
         const session =
             sessionDoc.data();
 
-
         const now =
             new Date();
-
 
         const end =
             new Date(
                 session.endTime
             );
-
-
-        // Automatically close expired session
 
         if (now >= end) {
 
@@ -1089,34 +1018,28 @@ async function checkActiveSession() {
                 }
             );
 
-
             resetSession();
 
             return;
         }
-
 
         const status =
             document.getElementById(
                 "sessionStatus"
             );
 
-
         status.textContent =
             `Group ${session.group} attendance is OPEN until ${formatTime(end)}.`;
 
-
         status.className =
             "session-status session-active";
-
 
         document
             .getElementById(
                 "sessionGroup"
             )
             .value =
-            session.group;
-
+            String(session.group);
 
         document
             .getElementById(
@@ -1124,7 +1047,6 @@ async function checkActiveSession() {
             )
             .disabled =
             true;
-
 
         document
             .getElementById(
@@ -1133,7 +1055,6 @@ async function checkActiveSession() {
             .disabled =
             true;
 
-
         document
             .getElementById(
                 "openSessionBtn"
@@ -1141,14 +1062,12 @@ async function checkActiveSession() {
             .style.display =
             "none";
 
-
         document
             .getElementById(
                 "closeSessionBtn"
             )
             .style.display =
             "inline-block";
-
 
     } catch (error) {
 
@@ -1183,12 +1102,10 @@ async function closeSession() {
                 )
             );
 
-
         const snapshot =
             await getDocs(
                 activeQuery
             );
-
 
         for (
             const sessionDoc
@@ -1214,11 +1131,9 @@ async function closeSession() {
 
         }
 
-
         resetSession();
 
         await loadAttendance();
-
 
     } catch (error) {
 
@@ -1248,7 +1163,6 @@ function resetSession() {
             "sessionStatus"
         );
 
-
     if (status) {
 
         status.textContent =
@@ -1259,40 +1173,33 @@ function resetSession() {
 
     }
 
-
     const openBtn =
         document.getElementById(
             "openSessionBtn"
         );
-
 
     const closeBtn =
         document.getElementById(
             "closeSessionBtn"
         );
 
-
     const group =
         document.getElementById(
             "sessionGroup"
         );
-
 
     const duration =
         document.getElementById(
             "sessionDuration"
         );
 
-
     if (openBtn)
         openBtn.style.display =
             "inline-block";
 
-
     if (closeBtn)
         closeBtn.style.display =
             "none";
-
 
     if (group) {
 
@@ -1303,7 +1210,6 @@ function resetSession() {
             "";
 
     }
-
 
     if (duration)
         duration.disabled =
@@ -1321,16 +1227,20 @@ async function loadAttendance() {
     absentList.innerHTML =
         "<p>Loading attendance...</p>";
 
-
     try {
 
         const selectedGroup =
-            groupFilter.value;
-
+            String(
+                groupFilter.value || ""
+            ).trim();
 
         const selectedDate =
             dateFilter.value;
 
+        console.log(
+            "Selected group:",
+            selectedGroup
+        );
 
         const snapshot =
             await getDocs(
@@ -1340,9 +1250,7 @@ async function loadAttendance() {
                 )
             );
 
-
         const records = [];
-
 
         snapshot.forEach(
             (docSnapshot) => {
@@ -1350,18 +1258,35 @@ async function loadAttendance() {
                 const data =
                     docSnapshot.data();
 
+                // =========================================
+                // FIXED GROUP FILTER
+                // =========================================
 
-                // Group filter
+                const recordGroup =
+                    String(
+                        data.group ?? ""
+                    ).trim();
 
                 if (
                     selectedGroup &&
-                    data.group !== selectedGroup
+                    recordGroup !== selectedGroup
                 ) {
+
+                    console.log(
+                        "Skipping record:",
+                        data.studentName,
+                        "record group:",
+                        recordGroup,
+                        "selected group:",
+                        selectedGroup
+                    );
+
                     return;
                 }
 
-
-                // Date filter
+                // =========================================
+                // DATE FILTER
+                // =========================================
 
                 if (
                     data.submittedAt &&
@@ -1373,15 +1298,14 @@ async function loadAttendance() {
                             data.submittedAt.toDate()
                         );
 
-
                     if (
                         date !== selectedDate
                     ) {
+
                         return;
                     }
 
                 }
-
 
                 records.push({
 
@@ -1395,31 +1319,37 @@ async function loadAttendance() {
             }
         );
 
-
-        // Sort newest first
+        // =========================================
+        // SORT NEWEST FIRST
+        // =========================================
 
         records.sort(
             (a, b) => {
 
                 const aTime =
-                    a.submittedAt?.seconds ||
-                    0;
+                    getTimestampValue(
+                        a.submittedAt
+                    );
 
                 const bTime =
-                    b.submittedAt?.seconds ||
-                    0;
+                    getTimestampValue(
+                        b.submittedAt
+                    );
 
                 return bTime - aTime;
 
             }
         );
 
+        console.log(
+            "Filtered attendance records:",
+            records
+        );
 
         displayAttendance(
             records,
             selectedGroup
         );
-
 
     } catch (error) {
 
@@ -1427,7 +1357,6 @@ async function loadAttendance() {
             "ATTENDANCE ERROR:",
             error
         );
-
 
         absentList.innerHTML = `
 
@@ -1459,7 +1388,6 @@ function displayAttendance(
 
     let total = 0;
 
-
     if (selectedGroup) {
 
         total =
@@ -1478,14 +1406,11 @@ function displayAttendance(
 
     }
 
-
     totalStudents.textContent =
         total;
 
-
     absentCount.textContent =
         records.length;
-
 
     if (records.length === 0) {
 
@@ -1500,9 +1425,7 @@ function displayAttendance(
         return;
     }
 
-
     absentList.innerHTML = "";
-
 
     records.forEach(
         (record, index) => {
@@ -1512,14 +1435,11 @@ function displayAttendance(
                     "div"
                 );
 
-
             item.className =
                 "attendance-item";
 
-
             let time =
                 "";
-
 
             if (
                 record.submittedAt &&
@@ -1532,7 +1452,6 @@ function displayAttendance(
                     );
 
             }
-
 
             item.innerHTML = `
 
@@ -1548,8 +1467,10 @@ function displayAttendance(
 
                 Group:
                 ${escapeHtml(
-                    record.group ||
-                    "-"
+                    String(
+                        record.group ??
+                        "-"
+                    )
                 )}
 
                 <br>
@@ -1575,18 +1496,17 @@ function displayAttendance(
 
             `;
 
-
             item
                 .querySelector(
                     ".delete-attendance"
                 )
                 .addEventListener(
                     "click",
-                    () => deleteAttendance(
-                        record.id
-                    )
+                    () =>
+                        deleteAttendance(
+                            record.id
+                        )
                 );
-
 
             absentList.appendChild(
                 item
@@ -1611,11 +1531,10 @@ async function deleteAttendance(
             "Are you sure you want to delete this absence record?"
         );
 
-
     if (!confirmDelete) {
+
         return;
     }
-
 
     try {
 
@@ -1627,9 +1546,7 @@ async function deleteAttendance(
             )
         );
 
-
         await loadAttendance();
-
 
     } catch (error) {
 
@@ -1638,13 +1555,56 @@ async function deleteAttendance(
             error
         );
 
-
         alert(
             "Could not delete record:\n" +
             error.message
         );
 
     }
+
+}
+
+
+// =====================================================
+// FIRESTORE TIMESTAMP HELPER
+// =====================================================
+
+function getTimestampValue(
+    timestamp
+) {
+
+    if (!timestamp) {
+
+        return 0;
+    }
+
+    if (
+        typeof timestamp.toMillis ===
+        "function"
+    ) {
+
+        return timestamp.toMillis();
+
+    }
+
+    if (
+        typeof timestamp.seconds ===
+        "number"
+    ) {
+
+        return timestamp.seconds * 1000;
+
+    }
+
+    if (
+        timestamp instanceof Date
+    ) {
+
+        return timestamp.getTime();
+
+    }
+
+    return 0;
 
 }
 
@@ -1658,10 +1618,8 @@ function todayString() {
     const now =
         new Date();
 
-
     const year =
         now.getFullYear();
-
 
     const month =
         String(
@@ -1671,7 +1629,6 @@ function todayString() {
             "0"
         );
 
-
     const day =
         String(
             now.getDate()
@@ -1679,7 +1636,6 @@ function todayString() {
             2,
             "0"
         );
-
 
     return `${year}-${month}-${day}`;
 
@@ -1691,7 +1647,6 @@ function dateString(date) {
     const year =
         date.getFullYear();
 
-
     const month =
         String(
             date.getMonth() + 1
@@ -1700,7 +1655,6 @@ function dateString(date) {
             "0"
         );
 
-
     const day =
         String(
             date.getDate()
@@ -1708,7 +1662,6 @@ function dateString(date) {
             2,
             "0"
         );
-
 
     return `${year}-${month}-${day}`;
 
@@ -1744,10 +1697,8 @@ function escapeHtml(text) {
             "div"
         );
 
-
     div.textContent =
-        text;
-
+        String(text);
 
     return div.innerHTML;
 
@@ -1764,7 +1715,6 @@ function getErrorMessage(error) {
         "Firebase error:",
         error
     );
-
 
     switch (error.code) {
 
