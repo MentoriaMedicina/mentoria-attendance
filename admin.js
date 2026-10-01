@@ -1840,3 +1840,263 @@ function getErrorMessage(error) {
     }
 
 }
+
+// ================================================
+// DOWNLOAD ABSENT STUDENTS PDF
+// ================================================
+
+const downloadAbsentPdfBtn = document.getElementById("downloadAbsentPdf");
+
+if (downloadAbsentPdfBtn) {
+
+    downloadAbsentPdfBtn.addEventListener("click", async () => {
+
+        try {
+
+            downloadAbsentPdfBtn.disabled = true;
+            downloadAbsentPdfBtn.textContent = "Preparing PDF...";
+
+            const selectedDate =
+                document.getElementById("dateFilter")?.value;
+
+            const selectedGroup =
+                document.getElementById("groupFilter")?.value || "";
+
+            if (!selectedDate) {
+                alert("Please select a date first.");
+                return;
+            }
+
+            // Get attendance collection
+            const snapshot = await getDocs(
+                collection(db, "attendance")
+            );
+
+            const absentStudents = [];
+
+            snapshot.forEach((docSnap) => {
+
+                const data = docSnap.data();
+
+                // Only absent records
+                if (String(data.status || "").toLowerCase() !== "absent") {
+                    return;
+                }
+
+                // Group filter
+                const studentGroup = String(data.group || "");
+
+                if (
+                    selectedGroup &&
+                    studentGroup !== "Group " + selectedGroup
+                ) {
+                    return;
+                }
+
+                // Date from submittedAt
+                let recordDate = "";
+
+                if (
+                    data.submittedAt &&
+                    typeof data.submittedAt.toDate === "function"
+                ) {
+                    recordDate = data.submittedAt
+                        .toDate()
+                        .toISOString()
+                        .split("T")[0];
+                }
+
+                // If document has date field, use it
+                if (data.date) {
+                    recordDate = String(data.date);
+                }
+
+                // Selected date filter
+                if (recordDate !== selectedDate) {
+                    return;
+                }
+
+                absentStudents.push({
+                    group: studentGroup,
+                    name: data.studentName || "Unknown",
+                    studentId: data.studentId || ""
+                });
+
+            });
+
+
+            // Sort
+            absentStudents.sort((a, b) => {
+
+                const groupCompare =
+                    a.group.localeCompare(b.group);
+
+                if (groupCompare !== 0) {
+                    return groupCompare;
+                }
+
+                return a.name.localeCompare(b.name);
+
+            });
+
+
+            // No records
+            if (absentStudents.length === 0) {
+
+                alert(
+                    "No absent students found for the selected date/group."
+                );
+
+                return;
+            }
+
+
+            // Check jsPDF
+            if (!window.jspdf) {
+
+                alert(
+                    "PDF library is not loaded. Please refresh the page."
+                );
+
+                return;
+            }
+
+
+            const { jsPDF } = window.jspdf;
+
+            const pdf = new jsPDF();
+
+
+            // Title
+            pdf.setFontSize(18);
+
+            pdf.text(
+                "Mentoria Medicina",
+                105,
+                18,
+                { align: "center" }
+            );
+
+
+            pdf.setFontSize(14);
+
+            pdf.text(
+                "Absent Students",
+                105,
+                28,
+                { align: "center" }
+            );
+
+
+            pdf.setFontSize(10);
+
+            pdf.text(
+                "Date: " + selectedDate,
+                14,
+                40
+            );
+
+
+            pdf.text(
+                "Group: " +
+                (selectedGroup
+                    ? "Group " + selectedGroup
+                    : "All Groups"),
+                14,
+                47
+            );
+
+
+            pdf.text(
+                "Total Absent: " +
+                absentStudents.length,
+                14,
+                54
+            );
+
+
+            // Table
+            const tableRows = absentStudents.map(
+                (student, index) => [
+                    index + 1,
+                    student.group,
+                    student.name,
+                    student.studentId
+                ]
+            );
+
+
+            pdf.autoTable({
+
+                startY: 62,
+
+                head: [
+                    [
+                        "No.",
+                        "Group",
+                        "Student Name",
+                        "Student ID"
+                    ]
+                ],
+
+                body: tableRows,
+
+                theme: "grid",
+
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 3
+                },
+
+                headStyles: {
+                    fontStyle: "bold"
+                }
+
+            });
+
+
+            // File name
+            const groupName =
+                selectedGroup
+                    ? "Group_" + selectedGroup
+                    : "All_Groups";
+
+            const fileName =
+                "Mentoria_Absent_" +
+                groupName +
+                "_" +
+                selectedDate +
+                ".pdf";
+
+
+            // Download
+            pdf.save(fileName);
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "PDF DOWNLOAD ERROR:",
+                error
+            );
+
+            alert(
+                "Could not create PDF.\n\n" +
+                (error.message || error)
+            );
+
+        }
+
+        finally {
+
+            downloadAbsentPdfBtn.disabled = false;
+
+            downloadAbsentPdfBtn.textContent =
+                "Download Absent PDF";
+
+        }
+
+    });
+
+                    }
