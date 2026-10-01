@@ -348,6 +348,38 @@
 
 
         /* ================================
+           PDF DOWNLOAD BUTTON
+        ================================= */
+
+        #downloadAbsentPdf {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 13px 18px;
+            border: none;
+            border-radius: 8px;
+            background: #1565c0;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #downloadAbsentPdf:hover {
+            background: #0d47a1;
+        }
+
+        #downloadAbsentPdf:active {
+            transform: scale(0.98);
+        }
+
+        #downloadAbsentPdf:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+
+        /* ================================
            MOBILE
         ================================= */
 
@@ -563,6 +595,16 @@
                     Attendance Details
                 </h2>
 
+                <!-- PDF BUTTON -->
+
+                <button
+                    id="downloadAbsentPdf"
+                    type="button"
+                >
+                    Download Absent PDF
+                </button>
+
+
                 <div id="absentList">
 
                     <p>
@@ -577,6 +619,16 @@
         </div>
 
     </section>
+
+
+
+    <!-- =================================================
+         PDF LIBRARIES
+    ================================================== -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
 
 
