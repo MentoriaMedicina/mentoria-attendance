@@ -1423,37 +1423,49 @@ async function loadAttendance() {
 
 
  // =====================================================
-// REMOVE DUPLICATE ATTENDANCE
-// Same student + same session = show only once
+// REMOVE DUPLICATE STUDENT ATTENDANCE FOR SAME DAY
+// Same student + same group + same date = show only once
+// Different days = show separately
 // =====================================================
 
 const uniqueRecords = new Map();
 
 records.forEach((record) => {
 
-    let key;
+    let date = "unknown";
 
-    // Use sessionId + studentId when available
     if (
-        record.sessionId &&
-        record.studentId
+        record.submittedAt &&
+        record.submittedAt.toDate
     ) {
 
-        key =
-            record.sessionId +
-            "_" +
-            record.studentId;
-
-    } else {
-
-        // Keep records without sessionId unchanged
-        key =
-            record.id;
+        date =
+            dateString(
+                record.submittedAt.toDate()
+            );
 
     }
 
+    const student =
+        record.studentId ||
+        record.studentName ||
+        record.id;
 
-    if (!uniqueRecords.has(key)) {
+    const group =
+        record.group ||
+        selectedGroup ||
+        "";
+
+    const key =
+        group +
+        "_" +
+        student +
+        "_" +
+        date;
+
+    if (
+        !uniqueRecords.has(key)
+    ) {
 
         uniqueRecords.set(
             key,
@@ -1464,6 +1476,8 @@ records.forEach((record) => {
 
 });
 
+
+// Convert back to array
 
 const finalRecords =
     Array.from(
@@ -1496,12 +1510,6 @@ displayAttendance(
     finalRecords,
     selectedGroup
 );
-
-
-        displayAttendance(
-            records,
-            selectedGroup
-        );
 
 
     } catch (error) {
