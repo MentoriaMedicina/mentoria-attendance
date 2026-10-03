@@ -1422,23 +1422,80 @@ async function loadAttendance() {
         );
 
 
-        // Sort newest first
+ // =====================================================
+// REMOVE DUPLICATE ATTENDANCE
+// Same student + same session = show only once
+// =====================================================
 
-        records.sort(
-            (a, b) => {
+const uniqueRecords = new Map();
 
-                const aTime =
-                    a.submittedAt?.seconds ||
-                    0;
+records.forEach((record) => {
 
-                const bTime =
-                    b.submittedAt?.seconds ||
-                    0;
+    let key;
 
-                return bTime - aTime;
+    // Use sessionId + studentId when available
+    if (
+        record.sessionId &&
+        record.studentId
+    ) {
 
-            }
+        key =
+            record.sessionId +
+            "_" +
+            record.studentId;
+
+    } else {
+
+        // Keep records without sessionId unchanged
+        key =
+            record.id;
+
+    }
+
+
+    if (!uniqueRecords.has(key)) {
+
+        uniqueRecords.set(
+            key,
+            record
         );
+
+    }
+
+});
+
+
+const finalRecords =
+    Array.from(
+        uniqueRecords.values()
+    );
+
+
+// =====================================================
+// SORT NEWEST FIRST
+// =====================================================
+
+finalRecords.sort(
+    (a, b) => {
+
+        const aTime =
+            a.submittedAt?.seconds ||
+            0;
+
+        const bTime =
+            b.submittedAt?.seconds ||
+            0;
+
+        return bTime - aTime;
+
+    }
+);
+
+
+displayAttendance(
+    finalRecords,
+    selectedGroup
+);
 
 
         displayAttendance(
