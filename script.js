@@ -78,7 +78,7 @@ const groups = {
         "Afsal",
         "Ashwin",
         "Vibin",
-        "Arjun",
+        "Akshay",
         "Revathy",
         "Aksa",
         "Vincy",
@@ -111,7 +111,6 @@ const groups = {
     "ALFIYA",
     "LAKSHMISHREE",
     "RIYA SHAJI",
-    "STEFY B",
     "SREEMATHI G",
     "ANN MARIA",
     "JAREENA",
@@ -256,7 +255,6 @@ const groups = {
         "Jasmine Maria John",
         "Aisha M Anzari",
         "Alakanandha",
-        "Adhithya S",
         "Snena Angel",
         "Christy Sara Pinto"
 
