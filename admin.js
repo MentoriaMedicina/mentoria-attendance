@@ -1952,35 +1952,7 @@ if (downloadAbsentPdfBtn) {
 
 });
           
-// =====================================================
-// REMOVE DUPLICATES FOR PDF
-// Same student + same group + same date = ONE ENTRY
-// =====================================================
 
-const uniquePDFRecords = new Map();
-
-absentStudents.forEach((student) => {
-
-    const key =
-        student.group +
-        "_" +
-        student.studentId +
-        "_" +
-        selectedDate;
-
-    if (!uniquePDFRecords.has(key)) {
-        uniquePDFRecords.set(
-            key,
-            student
-        );
-    }
-
-});
-
-const pdfRecords =
-    Array.from(
-        uniquePDFRecords.values()
-    );
 
                 // Only absent records
                 if (String(data.status || "").toLowerCase() !== "absent") {
@@ -2027,6 +1999,35 @@ const pdfRecords =
                 });
 
             });
+    // =====================================================
+// REMOVE DUPLICATES FOR PDF
+// Same student + same group + same date = ONE ENTRY
+// =====================================================
+
+const uniquePDFRecords = new Map();
+
+absentStudents.forEach((student) => {
+
+    const key =
+        student.group +
+        "_" +
+        student.studentId +
+        "_" +
+        selectedDate;
+
+    if (!uniquePDFRecords.has(key)) {
+        uniquePDFRecords.set(
+            key,
+            student
+        );
+    }
+
+});
+
+const pdfRecords =
+    Array.from(
+        uniquePDFRecords.values()
+    );
 
 
             // Sort
