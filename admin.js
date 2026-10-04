@@ -1905,7 +1905,6 @@ function getErrorMessage(error) {
     }
 
 }
-
 // ================================================
 // DOWNLOAD ABSENT STUDENTS PDF
 // ================================================
@@ -1921,67 +1920,114 @@ if (downloadAbsentPdfBtn) {
 
             try {
 
+                // Disable button while creating PDF
                 downloadAbsentPdfBtn.disabled = true;
+
                 downloadAbsentPdfBtn.textContent =
                     "Preparing PDF...";
+
+
+                // =========================================
+                // GET SELECTED DATE
+                // =========================================
 
                 const selectedDate =
                     document.getElementById("dateFilter")?.value;
 
+
+                // =========================================
+                // GET SELECTED GROUP
+                // =========================================
+
                 const selectedGroup =
                     document.getElementById("groupFilter")?.value || "";
 
+
+                // =========================================
+                // CHECK DATE
+                // =========================================
+
                 if (!selectedDate) {
-                    alert("Please select a date first.");
+
+                    alert(
+                        "Please select a date first."
+                    );
+
                     return;
                 }
+
 
                 // =========================================
                 // GET ALL ATTENDANCE RECORDS
                 // =========================================
 
-                const snapshot = await getDocs(
-                    collection(db, "attendance")
-                );
+                const snapshot =
+                    await getDocs(
+                        collection(db, "attendance")
+                    );
+
 
                 // =========================================
-                // REMOVE DUPLICATE STUDENTS
-                // SAME STUDENT + SAME DAY = ONE ENTRY
+                // UNIQUE STUDENTS MAP
                 // =========================================
 
-                const uniqueStudents = new Map();
+                const uniqueStudents =
+                    new Map();
+
+
+                // =========================================
+                // CHECK EACH ATTENDANCE RECORD
+                // =========================================
 
                 snapshot.forEach((docSnap) => {
 
-                    const data = docSnap.data();
+                    const data =
+                        docSnap.data();
 
-                    // Only absent students
+
+                    // =====================================
+                    // ONLY ABSENT STUDENTS
+                    // =====================================
+
                     if (
-                        String(data.status || "").toLowerCase() !==
-                        "absent"
+                        String(
+                            data.status || ""
+                        ).toLowerCase() !== "absent"
                     ) {
+
                         return;
                     }
+
+
+                    // =====================================
+                    // GET GROUP
+                    // =====================================
+
+                    const studentGroup =
+                        String(
+                            data.group || ""
+                        ).trim();
+
 
                     // =====================================
                     // GROUP FILTER
                     // =====================================
 
-                    const studentGroup =
-                        String(data.group || "");
-
                     if (
                         selectedGroup &&
                         studentGroup !== selectedGroup
                     ) {
+
                         return;
                     }
 
+
                     // =====================================
-                    // GET DATE
+                    // GET RECORD DATE
                     // =====================================
 
                     let recordDate = "";
+
 
                     if (
                         data.submittedAt &&
@@ -1992,56 +2038,98 @@ if (downloadAbsentPdfBtn) {
                         const submittedDate =
                             data.submittedAt.toDate();
 
+
                         recordDate =
-                            dateString(submittedDate);
+                            dateString(
+                                submittedDate
+                            );
                     }
 
+
+                    // If data.date exists,
+                    // use that date
+
                     if (data.date) {
+
                         recordDate =
-                            String(data.date);
+                            String(
+                                data.date
+                            ).trim();
                     }
+
 
                     // =====================================
                     // DATE FILTER
                     // =====================================
 
-                    if (recordDate !== selectedDate) {
+                    if (
+                        recordDate !== selectedDate
+                    ) {
+
                         return;
                     }
 
+
                     // =====================================
-                    // STUDENT ID
+                    // GET STUDENT NAME
                     // =====================================
 
-                    const studentId =
+                    const studentName =
                         String(
-                            data.studentId ||
                             data.studentName ||
-                            docSnap.id
-                        );
+                            "Unknown"
+                        ).trim();
+
 
                     // =====================================
-                    // UNIQUE KEY
+                    // NORMALIZE STUDENT NAME
+                    // =====================================
+
+                    const normalizedName =
+                        studentName
+                            .toLowerCase()
+                            .replace(
+                                /\s+/g,
+                                " "
+                            );
+
+
+                    // =====================================
+                    // CREATE UNIQUE KEY
                     // =====================================
 
                     const uniqueKey =
-                        studentGroup +
-                        "_" +
-                        studentId +
-                        "_" +
+                        studentGroup
+                            .toLowerCase()
+                            .trim()
+                        +
+                        "|"
+                        +
+                        normalizedName
+                        +
+                        "|"
+                        +
                         recordDate;
 
-                    // Only add once
-                    if (!uniqueStudents.has(uniqueKey)) {
+
+                    // =====================================
+                    // ADD ONLY IF NOT ALREADY EXISTS
+                    // =====================================
+
+                    if (
+                        !uniqueStudents.has(
+                            uniqueKey
+                        )
+                    ) {
 
                         uniqueStudents.set(
                             uniqueKey,
                             {
-                                group: studentGroup,
+                                group:
+                                    studentGroup,
 
                                 name:
-                                    data.studentName ||
-                                    "Unknown",
+                                    studentName,
 
                                 studentId:
                                     data.studentId ||
@@ -2049,7 +2137,9 @@ if (downloadAbsentPdfBtn) {
                             }
                         );
                     }
+
                 });
+
 
                 // =========================================
                 // CONVERT MAP TO ARRAY
@@ -2060,31 +2150,46 @@ if (downloadAbsentPdfBtn) {
                         uniqueStudents.values()
                     );
 
+
                 // =========================================
                 // SORT STUDENTS
                 // =========================================
 
-                absentStudents.sort((a, b) => {
+                absentStudents.sort(
+                    (a, b) => {
 
-                    const groupCompare =
-                        a.group.localeCompare(
-                            b.group
+                        // First sort by group
+
+                        const groupCompare =
+                            a.group.localeCompare(
+                                b.group
+                            );
+
+
+                        if (
+                            groupCompare !== 0
+                        ) {
+
+                            return groupCompare;
+                        }
+
+
+                        // Then sort by student name
+
+                        return a.name.localeCompare(
+                            b.name
                         );
-
-                    if (groupCompare !== 0) {
-                        return groupCompare;
                     }
+                );
 
-                    return a.name.localeCompare(
-                        b.name
-                    );
-                });
 
                 // =========================================
                 // NO ABSENT STUDENTS
                 // =========================================
 
-                if (absentStudents.length === 0) {
+                if (
+                    absentStudents.length === 0
+                ) {
 
                     alert(
                         "No absent students found for the selected date/group."
@@ -2092,6 +2197,7 @@ if (downloadAbsentPdfBtn) {
 
                     return;
                 }
+
 
                 // =========================================
                 // CHECK PDF LIBRARY
@@ -2106,14 +2212,21 @@ if (downloadAbsentPdfBtn) {
                     return;
                 }
 
+
+                // =========================================
+                // CREATE PDF
+                // =========================================
+
                 const { jsPDF } =
                     window.jspdf;
+
 
                 const pdf =
                     new jsPDF();
 
+
                 // =========================================
-                // PDF TITLE
+                // TITLE
                 // =========================================
 
                 pdf.setFontSize(18);
@@ -2127,6 +2240,7 @@ if (downloadAbsentPdfBtn) {
                     }
                 );
 
+
                 pdf.setFontSize(14);
 
                 pdf.text(
@@ -2138,6 +2252,7 @@ if (downloadAbsentPdfBtn) {
                     }
                 );
 
+
                 // =========================================
                 // DATE
                 // =========================================
@@ -2145,10 +2260,12 @@ if (downloadAbsentPdfBtn) {
                 pdf.setFontSize(10);
 
                 pdf.text(
-                    "Date: " + selectedDate,
+                    "Date: " +
+                    selectedDate,
                     14,
                     40
                 );
+
 
                 // =========================================
                 // GROUP
@@ -2165,6 +2282,7 @@ if (downloadAbsentPdfBtn) {
                     47
                 );
 
+
                 // =========================================
                 // TOTAL ABSENT
                 // =========================================
@@ -2176,13 +2294,17 @@ if (downloadAbsentPdfBtn) {
                     54
                 );
 
+
                 // =========================================
-                // TABLE DATA
+                // TABLE ROWS
                 // =========================================
 
                 const tableRows =
                     absentStudents.map(
-                        (student, index) => [
+                        (
+                            student,
+                            index
+                        ) => [
 
                             index + 1,
 
@@ -2194,6 +2316,7 @@ if (downloadAbsentPdfBtn) {
                         ]
                     );
 
+
                 // =========================================
                 // CREATE TABLE
                 // =========================================
@@ -2203,30 +2326,42 @@ if (downloadAbsentPdfBtn) {
                     startY: 62,
 
                     head: [
+
                         [
                             "No.",
                             "Group",
                             "Student Name",
                             "Student ID"
                         ]
+
                     ],
 
-                    body: tableRows,
+                    body:
+                        tableRows,
 
-                    theme: "grid",
+                    theme:
+                        "grid",
 
                     styles: {
-                        fontSize: 9,
-                        cellPadding: 3
+
+                        fontSize:
+                            9,
+
+                        cellPadding:
+                            3
                     },
 
                     headStyles: {
-                        fontStyle: "bold"
+
+                        fontStyle:
+                            "bold"
                     }
+
                 });
 
+
                 // =========================================
-                // FILE NAME
+                // CREATE FILE NAME
                 // =========================================
 
                 const groupName =
@@ -2237,6 +2372,7 @@ if (downloadAbsentPdfBtn) {
                         )
                         : "All_Groups";
 
+
                 const fileName =
                     "Mentoria_Absent_" +
                     groupName +
@@ -2244,18 +2380,27 @@ if (downloadAbsentPdfBtn) {
                     selectedDate +
                     ".pdf";
 
+
                 // =========================================
-                // DOWNLOAD PDF
+                // DOWNLOAD
                 // =========================================
 
-                pdf.save(fileName);
+                pdf.save(
+                    fileName
+                );
+
 
             } catch (error) {
+
+                // =========================================
+                // ERROR
+                // =========================================
 
                 console.error(
                     "PDF DOWNLOAD ERROR:",
                     error
                 );
+
 
                 alert(
                     "Could not create PDF.\n\n" +
@@ -2265,7 +2410,12 @@ if (downloadAbsentPdfBtn) {
                     )
                 );
 
+
             } finally {
+
+                // =========================================
+                // ENABLE BUTTON AGAIN
+                // =========================================
 
                 downloadAbsentPdfBtn.disabled =
                     false;
@@ -2273,7 +2423,8 @@ if (downloadAbsentPdfBtn) {
                 downloadAbsentPdfBtn.textContent =
                     "Download Absent PDF";
             }
+
         }
     );
-}
-                
+                }
+
