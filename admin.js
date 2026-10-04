@@ -1942,6 +1942,45 @@ if (downloadAbsentPdfBtn) {
             snapshot.forEach((docSnap) => {
 
                 const data = docSnap.data();
+                // ...
+    
+    absentStudents.push({
+        group: studentGroup,
+        name: data.studentName || "Unknown",
+        studentId: data.studentId || ""
+    });
+
+});
+          
+// =====================================================
+// REMOVE DUPLICATES FOR PDF
+// Same student + same group + same date = ONE ENTRY
+// =====================================================
+
+const uniquePDFRecords = new Map();
+
+absentStudents.forEach((student) => {
+
+    const key =
+        student.group +
+        "_" +
+        student.studentId +
+        "_" +
+        selectedDate;
+
+    if (!uniquePDFRecords.has(key)) {
+        uniquePDFRecords.set(
+            key,
+            student
+        );
+    }
+
+});
+
+const pdfRecords =
+    Array.from(
+        uniquePDFRecords.values()
+    );
 
                 // Only absent records
                 if (String(data.status || "").toLowerCase() !== "absent") {
@@ -1991,7 +2030,7 @@ if (downloadAbsentPdfBtn) {
 
 
             // Sort
-            absentStudents.sort((a, b) => {
+            pdfRecords.sort((a, b) => {
 
                 const groupCompare =
                     a.group.localeCompare(b.group);
@@ -2074,14 +2113,14 @@ if (downloadAbsentPdfBtn) {
 
             pdf.text(
                 "Total Absent: " +
-                absentStudents.length,
+                pdfRecords.length,
                 14,
                 54
             );
 
 
             // Table
-            const tableRows = absentStudents.map(
+            const tableRows = pdfRecords.map(
                 (student, index) => [
                     index + 1,
                     student.group,
