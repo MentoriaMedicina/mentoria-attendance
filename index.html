@@ -14,38 +14,35 @@
 
     <!-- =========================================
          HOME PAGE
+         New section only
     ========================================== -->
 
     <section id="homePage" class="home-page">
 
-        <!-- Logo -->
         <img
             src="logo.png"
             alt="Mentoria Medicina Logo"
             class="home-logo"
         >
 
-        <!-- Heading -->
         <h1>Mentoria Medicina</h1>
 
         <p class="home-subtitle">
             Student Portal
         </p>
 
-
-        <!-- Attendance Button -->
         <button
             id="attendanceButton"
             class="home-button"
+            type="button"
         >
             📋 Attendance
         </button>
 
-
-        <!-- Library Button -->
         <button
             id="libraryButton"
             class="home-button"
+            type="button"
         >
             📚 Library
         </button>
@@ -55,81 +52,70 @@
 
     <!-- =========================================
          EXISTING ATTENDANCE PORTAL
-         (Your existing code is unchanged)
+         
+         KEEP THIS AREA AS YOUR ORIGINAL CODE
     ========================================== -->
 
-    <div id="attendancePage" style="display: none;">
+    <header>
 
-        <header>
+        <h1>Mentoria Medicina</h1>
 
-            <h1>Mentoria Medicina</h1>
+        <p class="portal-title">
+            Student Attendance
+        </p>
 
-            <p class="portal-title">
-                Student Attendance
+        <div class="controls">
+
+            <select id="groupSelect">
+                <option value="">Select Group</option>
+            </select>
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search student..."
+            >
+
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+        <section class="info-box">
+
+            <h2 id="classTitle">
+                Select a group
+            </h2>
+
+            <p>
+                Attendance Status:
+                <strong id="attendanceStatus">
+                    Demo Mode
+                </strong>
             </p>
 
-            <div class="controls">
+            <p>
+                Total Students:
+                <strong id="totalStudents">0</strong>
+            </p>
 
-                <select id="groupSelect">
+            <p>
+                Absent:
+                <strong id="absentCount">0</strong>
+            </p>
 
-                    <option value="">
-                        Select Group
-                    </option>
-
-                </select>
-
-                <input
-                    type="text"
-                    id="searchInput"
-                    placeholder="Search student..."
-                >
-
-            </div>
-
-        </header>
+        </section>
 
 
-        <main class="container">
+        <section id="studentList">
 
-            <section class="info-box">
+            <!-- Students will appear here -->
 
-                <h2 id="classTitle">
-                    Select a group
-                </h2>
+        </section>
 
-                <p>
-                    Attendance Status:
-                    <strong id="attendanceStatus">
-                        Demo Mode
-                    </strong>
-                </p>
-
-                <p>
-                    Total Students:
-                    <strong id="totalStudents">
-                        0
-                    </strong>
-                </p>
-
-                <p>
-                    Absent:
-                    <strong id="absentCount">
-                        0
-                    </strong>
-                </p>
-
-            </section>
-
-
-            <section id="studentList">
-
-                <!-- Students will appear here -->
-
-            </section>
-
-        </main>
-
-    </div>
+    </main>
 
 
     <!-- Existing JavaScript -->
@@ -137,26 +123,22 @@
 
 
     <!-- =========================================
-         HOME PAGE BUTTON CONTROL
+         HOME BUTTON CONTROL
     ========================================== -->
 
     <script>
 
-        // Attendance button
+        // Hide home page when Attendance is selected
         document
             .getElementById("attendanceButton")
             .addEventListener("click", function () {
 
-                document.getElementById("homePage").style.display =
-                    "none";
-
-                document.getElementById("attendancePage").style.display =
-                    "block";
+                document.getElementById("homePage").style.display = "none";
 
             });
 
 
-        // Library button
+        // Open Mentoria Medicina Library
         document
             .getElementById("libraryButton")
             .addEventListener("click", function () {
@@ -172,4 +154,4 @@
 
 </body>
 
-                    </html>
+</html>
