@@ -1,15 +1,14 @@
 /* =========================================================
    MENTORIA MEDICINA - HOME PAGE
-   ONLY HOME PAGE STYLING
-   Existing Attendance/Admin styles are NOT changed
+   NEW HOME PAGE ONLY
+   DO NOT CHANGE ATTENDANCE / ADMIN STYLES
 ========================================================= */
 
 .home-page {
     min-height: 100vh;
-
+    width: 100%;
     display: flex;
     flex-direction: column;
-
     align-items: center;
     justify-content: center;
 
@@ -19,59 +18,58 @@
         linear-gradient(
             145deg,
             #173f5f 0%,
-            #1f567d 45%,
+            #1f567d 50%,
             #f3f5f7 100%
         );
 
     text-align: center;
 
-    position: relative;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
 
-    overflow: hidden;
+    overflow-y: auto;
 }
 
 
-/* Decorative background circles */
+/* ---------- Decorative circles ---------- */
 
 .home-page::before {
     content: "";
-
     position: absolute;
 
-    width: 280px;
-    height: 280px;
+    width: 300px;
+    height: 300px;
 
     border-radius: 50%;
 
     background: rgba(255, 255, 255, 0.08);
 
-    top: -100px;
-    right: -80px;
+    top: -120px;
+    right: -100px;
 }
-
 
 .home-page::after {
     content: "";
-
     position: absolute;
 
-    width: 220px;
-    height: 220px;
+    width: 250px;
+    height: 250px;
 
     border-radius: 50%;
 
     background: rgba(255, 255, 255, 0.06);
 
-    bottom: -80px;
-    left: -70px;
+    bottom: -100px;
+    left: -100px;
 }
 
 
-/* ---------- LOGO ---------- */
+/* ---------- Logo ---------- */
 
 .home-logo {
-    width: 115px;
-    height: 115px;
+    width: 120px;
+    height: 120px;
 
     object-fit: contain;
 
@@ -85,11 +83,12 @@
             0 8px 15px rgba(0, 0, 0, 0.25)
         );
 
-    animation: homeLogoAppear 0.7s ease;
+    animation:
+        homeLogoAppear 0.7s ease;
 }
 
 
-/* ---------- TITLE ---------- */
+/* ---------- Main title ---------- */
 
 .home-page h1 {
     margin: 0;
@@ -97,7 +96,6 @@
     color: white;
 
     font-size: 32px;
-
     font-weight: 800;
 
     letter-spacing: 0.5px;
@@ -108,11 +106,12 @@
     text-shadow:
         0 3px 8px rgba(0, 0, 0, 0.25);
 
-    animation: homeTitleAppear 0.7s ease;
+    animation:
+        homeTitleAppear 0.7s ease;
 }
 
 
-/* ---------- SUBTITLE ---------- */
+/* ---------- Subtitle ---------- */
 
 .home-subtitle {
     margin: 7px 0 32px;
@@ -130,21 +129,19 @@
 }
 
 
-/* ---------- HOME BUTTONS ---------- */
+/* ---------- Home buttons ---------- */
 
 .home-button {
     width: 100%;
-
     max-width: 380px;
 
-    min-height: 82px;
+    min-height: 78px;
 
     margin: 8px 0;
 
     padding: 16px 22px;
 
     border: none;
-
     border-radius: 18px;
 
     background: rgba(255, 255, 255, 0.97);
@@ -152,7 +149,6 @@
     color: #173f5f;
 
     font-size: 18px;
-
     font-weight: 700;
 
     text-align: left;
@@ -179,13 +175,14 @@
 
     float: right;
 
-    font-size: 24px;
+    font-size: 25px;
 
     line-height: 1;
 
-    margin-top: 10px;
+    margin-top: 8px;
 
-    transition: transform 0.2s ease;
+    transition:
+        transform 0.2s ease;
 }
 
 
@@ -200,29 +197,19 @@
         0 12px 28px rgba(0, 0, 0, 0.24);
 }
 
-
-/* Arrow animation */
-
 .home-button:hover::after {
     transform: translateX(5px);
 }
 
 
-/* Click */
+/* Press */
 
 .home-button:active {
     transform: scale(0.98);
 }
 
 
-/* ---------- FOOTER TEXT ---------- */
-
-.home-page::marker {
-    display: none;
-}
-
-
-/* ---------- ANIMATIONS ---------- */
+/* ---------- Animations ---------- */
 
 @keyframes homeLogoAppear {
 
@@ -254,7 +241,7 @@
 }
 
 
-/* ---------- MOBILE ---------- */
+/* ---------- Mobile ---------- */
 
 @media (max-width: 480px) {
 
@@ -278,7 +265,8 @@
 
     .home-button {
         max-width: 100%;
-        min-height: 76px;
+
+        min-height: 74px;
 
         font-size: 17px;
 
