@@ -5,74 +5,171 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Mentoria Medicina - Student Attendance</title>
+    <title>Mentoria Medicina</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <header>
+    <!-- =========================================
+         HOME PAGE
+    ========================================== -->
 
-    <h1>Mentoria Medicina</h1>
+    <section id="homePage" class="home-page">
 
-    <p class="portal-title">Student Attendance</p>
-
-    <div class="controls">
-
-        <select id="groupSelect">
-            <option value="">Select Group</option>
-        </select>
-
-        <input
-            type="text"
-            id="searchInput"
-            placeholder="Search student..."
+        <!-- Logo -->
+        <img
+            src="logo.png"
+            alt="Mentoria Medicina Logo"
+            class="home-logo"
         >
+
+        <!-- Heading -->
+        <h1>Mentoria Medicina</h1>
+
+        <p class="home-subtitle">
+            Student Portal
+        </p>
+
+
+        <!-- Attendance Button -->
+        <button
+            id="attendanceButton"
+            class="home-button"
+        >
+            📋 Attendance
+        </button>
+
+
+        <!-- Library Button -->
+        <button
+            id="libraryButton"
+            class="home-button"
+        >
+            📚 Library
+        </button>
+
+    </section>
+
+
+    <!-- =========================================
+         EXISTING ATTENDANCE PORTAL
+         (Your existing code is unchanged)
+    ========================================== -->
+
+    <div id="attendancePage" style="display: none;">
+
+        <header>
+
+            <h1>Mentoria Medicina</h1>
+
+            <p class="portal-title">
+                Student Attendance
+            </p>
+
+            <div class="controls">
+
+                <select id="groupSelect">
+
+                    <option value="">
+                        Select Group
+                    </option>
+
+                </select>
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search student..."
+                >
+
+            </div>
+
+        </header>
+
+
+        <main class="container">
+
+            <section class="info-box">
+
+                <h2 id="classTitle">
+                    Select a group
+                </h2>
+
+                <p>
+                    Attendance Status:
+                    <strong id="attendanceStatus">
+                        Demo Mode
+                    </strong>
+                </p>
+
+                <p>
+                    Total Students:
+                    <strong id="totalStudents">
+                        0
+                    </strong>
+                </p>
+
+                <p>
+                    Absent:
+                    <strong id="absentCount">
+                        0
+                    </strong>
+                </p>
+
+            </section>
+
+
+            <section id="studentList">
+
+                <!-- Students will appear here -->
+
+            </section>
+
+        </main>
 
     </div>
 
-    </header>
 
-    <main class="container">
-
-        <section class="info-box">
-
-            <h2 id="classTitle">
-                Select a group
-            </h2>
-
-            <p>
-                Attendance Status:
-                <strong id="attendanceStatus">
-                    Demo Mode
-                </strong>
-            </p>
-
-            <p>
-                Total Students:
-                <strong id="totalStudents">0</strong>
-            </p>
-
-            <p>
-                Absent:
-                <strong id="absentCount">0</strong>
-            </p>
-
-        </section>
-
-
-        <section id="studentList">
-
-            <!-- Students will appear here -->
-
-        </section>
-
-    </main>
-
-
+    <!-- Existing JavaScript -->
     <script type="module" src="script.js"></script>
+
+
+    <!-- =========================================
+         HOME PAGE BUTTON CONTROL
+    ========================================== -->
+
+    <script>
+
+        // Attendance button
+        document
+            .getElementById("attendanceButton")
+            .addEventListener("click", function () {
+
+                document.getElementById("homePage").style.display =
+                    "none";
+
+                document.getElementById("attendancePage").style.display =
+                    "block";
+
+            });
+
+
+        // Library button
+        document
+            .getElementById("libraryButton")
+            .addEventListener("click", function () {
+
+                window.open(
+                    "https://mentoriamedicina.github.io/MMedicina/",
+                    "_blank"
+                );
+
+            });
+
+    </script>
 
 </body>
 
-</html>
+                    </html>
