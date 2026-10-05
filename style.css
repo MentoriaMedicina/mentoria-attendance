@@ -1,756 +1,288 @@
 /* =========================================================
-   MENTORIA MEDICINA - ATTENDANCE SYSTEM
-   style.css
+   MENTORIA MEDICINA - HOME PAGE
+   ONLY HOME PAGE STYLING
+   Existing Attendance/Admin styles are NOT changed
 ========================================================= */
 
-/* =========================
-   RESET
-========================= */
-
-* {
-    box-sizing: border-box;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: #f3f5f7;
-    color: #17202a;
-}
-
-
-/* =========================================================
-   STUDENT PAGE
-========================================================= */
-
-/* ---------- HEADER ---------- */
-
-header {
-    background: #173f5f;
-    color: white;
-    padding: 18px 15px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-header h1 {
-    margin: 0;
-    text-align: center;
-    font-size: 23px;
-    font-weight: 700;
-}
-
-.portal-title {
-    margin: 4px 0 15px;
-    text-align: center;
-    font-size: 15px;
-    font-weight: 400;
-    opacity: 0.9;
-}
-/* ---------- CONTROLS ---------- */
-
-.controls {
-    display: flex;
-    gap: 8px;
-    max-width: 700px;
-    margin: auto;
-}
-
-.controls select,
-.controls input {
-    flex: 1;
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    outline: none;
-    font-family: inherit;
-}
-
-.controls select:focus,
-.controls input:focus {
-    box-shadow: 0 0 0 2px #5dade2;
-}
-
-
-/* ---------- MAIN CONTAINER ---------- */
-
-.container {
-    width: 100%;
-    max-width: 720px;
-    margin: auto;
-    padding: 15px;
-}
-
-
-/* ---------- INFORMATION BOX ---------- */
-
-.info-box {
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.info-box h2 {
-    margin-top: 0;
-    font-size: 20px;
-}
-
-.info-box p {
-    margin: 8px 0;
-}
-
-
-/* ---------- STUDENT CARD ---------- */
-
-.student-card {
-    background: white;
-
-    padding: 13px;
-
-    margin-bottom: 9px;
-
-    border-radius: 12px;
+.home-page {
+    min-height: 100vh;
 
     display: flex;
+    flex-direction: column;
+
     align-items: center;
-    justify-content: space-between;
-
-    gap: 10px;
-
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-
-    transition: 0.2s;
-}
-
-.student-card:hover {
-    transform: translateY(-1px);
-
-    box-shadow:
-        0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-
-/* ---------- STUDENT INFORMATION ---------- */
-
-.student-info {
-    display: flex;
-    align-items: center;
-
-    gap: 8px;
-
-    min-width: 0;
-}
-
-.student-number {
-    color: #777;
-
-    font-size: 14px;
-
-    min-width: 25px;
-}
-
-.student-name {
-    font-size: 16px;
-
-    font-weight: 600;
-
-    word-break: break-word;
-}
-
-
-/* ---------- ABSENT BUTTON ---------- */
-
-.absent-button {
-    border: none;
-
-    border-radius: 9px;
-
-    padding: 11px 14px;
-
-    min-width: 105px;
-
-    background: #d9534f;
-
-    color: white;
-
-    font-weight: bold;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-}
-
-.absent-button:hover {
-    opacity: 0.9;
-}
-
-.absent-button:active {
-    transform: scale(0.95);
-}
-
-.absent-button:disabled {
-    cursor: not-allowed;
-
-    opacity: 0.8;
-}
-
-
-/* ---------- SUBMITTED BUTTON ---------- */
-
-.absent-button.submitted {
-    background: #2e8b57;
-
-    color: white;
-
-    cursor: not-allowed;
-}
-
-
-/* ---------- CLOSED BUTTON ---------- */
-
-.absent-button:disabled:not(.submitted) {
-    background: #777;
-}
-
-
-/* ---------- EMPTY MESSAGE ---------- */
-
-.empty-message {
-    text-align: center;
-
-    padding: 30px;
-
-    color: #777;
-
-    background: white;
-
-    border-radius: 12px;
-}
-
-
-/* ---------- STATUS ---------- */
-
-#attendanceStatus {
-    font-weight: bold;
-}
-
-
-/* =========================================================
-   ADMIN LOGIN
-========================================================= */
-
-.login-box {
-    max-width: 400px;
-
-    margin: 70px auto;
-
-    padding: 25px;
-
-    background: white;
-
-    border-radius: 15px;
-
-    box-shadow:
-        0 4px 15px rgba(0, 0, 0, 0.12);
-}
-
-.login-box h2 {
-    text-align: center;
-
-    margin-top: 0;
-
-    margin-bottom: 8px;
-}
-
-.login-subtitle {
-    text-align: center;
-
-    color: #777;
-
-    margin-top: 0;
-
-    margin-bottom: 20px;
-
-    font-size: 14px;
-}
-
-.login-box input {
-    width: 100%;
-
-    display: block;
-
-    margin-bottom: 12px;
-
-    padding: 12px;
-
-    border: 1px solid #ddd;
-
-    border-radius: 8px;
-
-    background: white;
-}
-
-.login-box input:focus {
-    border-color: #5dade2;
-
-    outline: none;
-}
-
-.login-btn {
-    width: 100%;
-
-    background: #173f5f;
-
-    color: white;
-
-    border: none;
-
-    border-radius: 8px;
-
-    padding: 12px;
-
-    font-weight: bold;
-
-    font-size: 15px;
-
-    cursor: pointer;
-}
-
-.login-btn:hover {
-    opacity: 0.9;
-}
-
-.login-btn:disabled {
-    opacity: 0.6;
-
-    cursor: not-allowed;
-}
-
-#loginMessage {
-    text-align: center;
-
-    color: #d9534f;
-
-    font-weight: bold;
-
-    min-height: 20px;
-
-    margin-top: 12px;
-}
-
-
-/* =========================================================
-   ADMIN DASHBOARD
-========================================================= */
-
-.admin-container {
-    max-width: 850px;
-
-    margin: auto;
-
-    padding: 15px;
-}
-
-.admin-header {
-    background: #173f5f;
-
-    color: white;
-
-    padding: 18px 15px;
-
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.admin-header h1 {
-    margin: 0;
+    justify-content: center;
+
+    padding: 30px 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #173f5f 0%,
+            #1f567d 45%,
+            #f3f5f7 100%
+        );
 
     text-align: center;
 
-    font-size: 23px;
-}
-
-.admin-subtitle {
-    text-align: center;
-
-    margin: 6px 0 0;
-
-    font-size: 14px;
-
-    opacity: 0.9;
-}
-
-
-/* ---------- ADMIN USER ---------- */
-
-.admin-user {
-    background: white;
-
-    padding: 12px 15px;
-
-    margin-bottom: 15px;
-
-    border-radius: 10px;
-
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.08);
+    position: relative;
 
     overflow: hidden;
 }
 
-.admin-user strong {
-    color: #173f5f;
+
+/* Decorative background circles */
+
+.home-page::before {
+    content: "";
+
+    position: absolute;
+
+    width: 280px;
+    height: 280px;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    top: -100px;
+    right: -80px;
 }
 
 
-/* ---------- LOGOUT ---------- */
+.home-page::after {
+    content: "";
 
-.logout-btn {
-    float: right;
+    position: absolute;
 
-    background: #d9534f;
+    width: 220px;
+    height: 220px;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.06);
+
+    bottom: -80px;
+    left: -70px;
+}
+
+
+/* ---------- LOGO ---------- */
+
+.home-logo {
+    width: 115px;
+    height: 115px;
+
+    object-fit: contain;
+
+    margin-bottom: 18px;
+
+    position: relative;
+    z-index: 2;
+
+    filter:
+        drop-shadow(
+            0 8px 15px rgba(0, 0, 0, 0.25)
+        );
+
+    animation: homeLogoAppear 0.7s ease;
+}
+
+
+/* ---------- TITLE ---------- */
+
+.home-page h1 {
+    margin: 0;
 
     color: white;
 
-    border: none;
+    font-size: 32px;
 
-    border-radius: 8px;
+    font-weight: 800;
 
-    padding: 8px 14px;
+    letter-spacing: 0.5px;
 
-    cursor: pointer;
+    position: relative;
+    z-index: 2;
 
-    font-weight: bold;
-}
+    text-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.25);
 
-.logout-btn:hover {
-    opacity: 0.9;
-}
-
-
-/* =========================================================
-   ADMIN CARDS
-========================================================= */
-
-.admin-card {
-    background: white;
-
-    padding: 18px;
-
-    border-radius: 12px;
-
-    margin-bottom: 15px;
-
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.admin-card h2 {
-    margin-top: 0;
-
-    font-size: 19px;
+    animation: homeTitleAppear 0.7s ease;
 }
 
 
-/* =========================================================
-   ADMIN FILTERS
-========================================================= */
+/* ---------- SUBTITLE ---------- */
 
-.admin-filters {
-    display: grid;
+.home-subtitle {
+    margin: 7px 0 32px;
 
-    grid-template-columns: 1fr 1fr;
-
-    gap: 10px;
-
-    margin-bottom: 12px;
-}
-
-.admin-filters label {
-    font-weight: bold;
-
-    display: block;
-
-    margin-bottom: 6px;
-
-    font-size: 14px;
-}
-
-.admin-filters select,
-.admin-filters input {
-    width: 100%;
-
-    border: 1px solid #ddd;
-
-    background: white;
-}
-
-
-/* =========================================================
-   SESSION CONTROLS
-========================================================= */
-
-.session-controls {
-    display: grid;
-
-    grid-template-columns: 1fr 1fr;
-
-    gap: 10px;
-
-    margin-top: 10px;
-}
-
-.session-controls label {
-    display: block;
-
-    font-weight: bold;
-
-    margin-bottom: 5px;
-
-    font-size: 14px;
-}
-
-.session-controls input,
-.session-controls select {
-    width: 100%;
-
-    border: 1px solid #ddd;
-
-    border-radius: 8px;
-
-    padding: 11px;
-
-    background: white;
-}
-
-
-/* ---------- SESSION STATUS ---------- */
-
-.session-status {
-    padding: 10px 12px;
-
-    border-radius: 8px;
-
-    margin: 10px 0;
-
-    font-weight: bold;
-
-    text-align: center;
-}
-
-.session-active {
-    background: #d1e7dd;
-
-    color: #0f5132;
-}
-
-.session-closed {
-    background: #f8d7da;
-
-    color: #842029;
-}
-
-.session-status.warning {
-    background: #fff3cd;
-
-    color: #856404;
-}
-
-.session-status.error {
-    background: #f8d7da;
-
-    color: #842029;
-}
-
-
-/* ---------- SESSION BUTTONS ---------- */
-
-.open-session-btn {
-    width: 100%;
-
-    background: #2e8b57;
-
-    color: white;
-
-    border: none;
-
-    border-radius: 8px;
-
-    padding: 12px;
-
-    font-weight: bold;
-
-    cursor: pointer;
-}
-
-.open-session-btn:hover {
-    background: #267349;
-}
-
-.close-session-btn {
-    width: 100%;
-
-    background: #d9534f;
-
-    color: white;
-
-    border: none;
-
-    border-radius: 8px;
-
-    padding: 12px;
-
-    font-weight: bold;
-
-    cursor: pointer;
-}
-
-.close-session-btn:hover {
-    background: #b52b27;
-}
-
-
-/* =========================================================
-   VIEW BUTTON
-========================================================= */
-
-.view-btn {
-    width: 100%;
-
-    background: #173f5f;
-
-    color: white;
-
-    border: none;
-
-    border-radius: 8px;
-
-    padding: 12px;
-
-    font-weight: bold;
+    color: rgba(255, 255, 255, 0.9);
 
     font-size: 15px;
 
+    letter-spacing: 1.5px;
+
+    text-transform: uppercase;
+
+    position: relative;
+    z-index: 2;
+}
+
+
+/* ---------- HOME BUTTONS ---------- */
+
+.home-button {
+    width: 100%;
+
+    max-width: 380px;
+
+    min-height: 82px;
+
+    margin: 8px 0;
+
+    padding: 16px 22px;
+
+    border: none;
+
+    border-radius: 18px;
+
+    background: rgba(255, 255, 255, 0.97);
+
+    color: #173f5f;
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    text-align: left;
+
     cursor: pointer;
+
+    position: relative;
+    z-index: 2;
+
+    box-shadow:
+        0 8px 22px rgba(0, 0, 0, 0.18);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
 }
 
 
-/* =========================================================
-   STATISTICS
-========================================================= */
+/* Arrow */
 
-.stats {
-    display: grid;
+.home-button::after {
+    content: "→";
 
-    grid-template-columns: repeat(3, 1fr);
+    float: right;
 
-    gap: 10px;
+    font-size: 24px;
 
-    margin-bottom: 15px;
-}
+    line-height: 1;
 
-.stat {
-    background: #f7f9fa;
-
-    padding: 15px;
-
-    border-radius: 10px;
-
-    text-align: center;
-
-    border: 1px solid #eee;
-}
-
-.stat-number {
-    display: block;
-
-    font-size: 25px;
-
-    font-weight: bold;
-
-    margin-bottom: 5px;
-}
-
-.stat-label {
-    font-size: 13px;
-
-    color: #666;
-}
-
-
-/* =========================================================
-   ADMIN ABSENT LIST
-========================================================= */
-
-.absent-list {
     margin-top: 10px;
-}
 
-.absent-item {
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    padding: 13px 5px;
-
-    border-bottom: 1px solid #eee;
-
-    gap: 10px;
-}
-
-.absent-item:last-child {
-    border-bottom: none;
-}
-
-.absent-student-name {
-    font-weight: 600;
-}
-
-.absent-student-group {
-    font-size: 12px;
-
-    color: #777;
-
-    margin-top: 3px;
-}
-
-.time {
-    color: #777;
-
-    font-size: 13px;
-
-    white-space: nowrap;
+    transition: transform 0.2s ease;
 }
 
 
-/* =========================================================
-   STATUS BADGES
-========================================================= */
+/* Hover */
 
-.status-absent {
-    display: inline-block;
+.home-button:hover {
+    transform: translateY(-3px);
 
-    background: #f8d7da;
+    background: white;
 
-    color: #842029;
+    box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.24);
+}
 
-    padding: 5px 9px;
 
-    border-radius: 6px;
+/* Arrow animation */
 
-    font-size: 12px;
+.home-button:hover::after {
+    transform: translateX(5px);
+}
 
-   
+
+/* Click */
+
+.home-button:active {
+    transform: scale(0.98);
+}
+
+
+/* ---------- FOOTER TEXT ---------- */
+
+.home-page::marker {
+    display: none;
+}
+
+
+/* ---------- ANIMATIONS ---------- */
+
+@keyframes homeLogoAppear {
+
+    from {
+        opacity: 0;
+        transform: scale(0.75);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+}
+
+
+@keyframes homeTitleAppear {
+
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 480px) {
+
+    .home-page {
+        padding: 25px 18px;
+    }
+
+    .home-logo {
+        width: 100px;
+        height: 100px;
+    }
+
+    .home-page h1 {
+        font-size: 27px;
+    }
+
+    .home-subtitle {
+        font-size: 13px;
+        margin-bottom: 25px;
+    }
+
+    .home-button {
+        max-width: 100%;
+        min-height: 76px;
+
+        font-size: 17px;
+
+        border-radius: 16px;
+    }
+
+}
